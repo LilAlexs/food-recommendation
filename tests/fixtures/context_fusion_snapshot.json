@@ -1,0 +1,565 @@
+[
+  {
+    "case": "chain-1",
+    "stage": "vector_search_enhanced.output",
+    "result": [
+      {
+        "text": "# 宫保鸡丁\n\n菜系: 川菜\n难度: 4.0星\n\n时间信息: 准备时间: 1小时10分钟（含腌制1小时）, 烹饪时间: 约15分钟\n份量: 1-2人\n\n相关信息: Recipe, 荤菜, 四星",
+        "metadata": {
+          "node_id": "201002454",
+          "recipe_name": "宫保鸡丁",
+          "node_type": "Recipe",
+          "category": "荤菜",
+          "cuisine_type": "川菜",
+          "difficulty": 4,
+          "doc_type": "chunk",
+          "chunk_id": "201002454_chunk_499",
+          "parent_id": "201002454",
+          "score": 0.6978453993797302,
+          "search_type": "vector_enhanced"
+        }
+      },
+      {
+        "text": "## 制作步骤\n\n### 第1步\n步骤: 步骤1\n描述: 手枪腿去骨，用刀背拍松后切成1.5cm见方肉丁，清水浸泡10分钟，捞出控干备用\n方法: 切,腌制\n工具: 剪刀,刀,碗\n时间: 10分钟\n\n### 第2步\n步骤: 步骤2\n描述: 大葱绿与5g姜片加50g开水泡成葱姜水；葱白切1.5cm圆粒；花生微波高火5分钟焙干\n方法: 切,加热\n工具: 刀,微波炉\n时间: 5分钟\n\n### 第3步\n步骤: 步骤3\n描述: 鸡丁加盐2g、老抽5g、料酒15g、淀粉15g拌匀至发干，再分次加入葱姜水搅至粘手，盖膜冷藏腌1小时\n方法: 腌制\n工具: 碗,保鲜膜,冰箱\n时间: 1小时\n\n### 第4步\n步骤: 步骤4\n描述: 干辣椒切段；小火焙干辣椒至微糊，再焙香花椒，分别捞出备用\n方法: 炒,焙\n工具: 炒锅,锅铲\n时间: 2-3分钟\n\n### 第5步\n步骤: 步骤5\n描述: 大火热锅倒20g油，7成热下鸡丁煎至表面发白，翻面再煎30秒后翻炒均匀\n方法: 煎,炒\n工具: 炒锅,锅铲\n时间: 1-2分钟\n\n### 第6步\n步骤: 步骤6\n描述: 加入葱粒翻炒，倒入剩余葱姜水（不足100g补热水），盖盖中小火焖2分钟\n方法: 炒,焖\n工具: 炒锅,锅盖\n时间: 2分钟\n\n### 第7步\n步骤: 步骤7\n描述: 开盖转大火，加入熟花生、干辣椒、花椒，调入鸡精2g、香醋5g、白糖2g翻炒均匀\n方法: 炒\n工具: 锅铲\n时间: 30秒\n\n### 第8步\n步骤: 步骤8\n描述: 10g淀粉加50g水调成水淀粉，倒入锅中快速翻炒收汁至理想浓度\n方法: 勾芡\n工具: 锅铲\n时间: 30秒\n\n### 第9步\n步骤: 步骤9\n描述: 关火淋入芝麻油10g，翻匀即可出锅\n方法: 淋油\n工具: 锅铲\n时间: 10秒\n\n相关信息: Recipe, 荤菜, 四星",
+        "metadata": {
+          "node_id": "201002454",
+          "recipe_name": "宫保鸡丁",
+          "node_type": "Recipe",
+          "category": "荤菜",
+          "cuisine_type": "川菜",
+          "difficulty": 4,
+          "doc_type": "chunk",
+          "chunk_id": "201002454_chunk_501",
+          "parent_id": "201002454",
+          "score": 0.6543956995010376,
+          "search_type": "vector_enhanced"
+        }
+      },
+      {
+        "text": "## 制作步骤\n\n### 第1步\n步骤: 步骤1\n描述: 鸡腿去骨（如使用鸡腿排可忽略此步骤），鸡腿肉用刀背砸一砸，切成 2cm 的块。\n方法: 切,去骨\n工具: 刀,案板\n\n### 第2步\n步骤: 步骤2\n描述: 鸡腿肉中加入盐、鸡精（可选）、胡椒粉、生抽、老抽、料酒，抓拌至粘手时加入淀粉拌匀，加入食用油防止粘连，腌制 30 分钟。\n方法: 腌制,抓拌\n工具: 盆,筷子\n时间: 30分钟\n\n### 第3步\n步骤: 步骤3\n描述: 土豆去皮，切成 2cm 的块，沸水煮 5 分钟后捞出，控干水分，防止油炸时爆锅。\n方法: 切,煮\n工具: 刀,案板,锅,笊篱\n时间: 5分钟\n\n### 第4步\n步骤: 步骤4\n描述: 青椒去籽，切成 2cm 小片，放在笊篱中备用。\n方法: 切,去籽\n工具: 刀,案板,笊篱\n\n### 第5步\n步骤: 步骤5\n描述: 锅中加入宽油（根据锅的形状，能没过食材即可），油温烧至 180℃ 时，下入土豆块炸 3 分钟后捞出。\n方法: 炸\n工具: 锅,笊篱\n时间: 3分钟\n\n### 第6步\n步骤: 步骤6\n描述: 待油温再次升高到 180℃时，下入鸡块炸 2 分钟后捞出。\n方法: 炸\n工具: 锅,笊篱\n时间: 2分钟\n\n### 第7步\n步骤: 步骤7\n描述: 待油温再次升高到 180℃时，下入鸡块复炸 1 分钟后捞出。\n方法: 炸\n工具: 锅,笊篱\n时间: 1分钟\n\n### 第8步\n步骤: 步骤8\n描述: 待油温再次升高到 180℃时，下入土豆块复炸 1 分钟后，将锅中的油和土豆块经过笊篱过滤倒出，让笊篱上的青椒片断生。\n方法: 炸,过滤\n工具: 锅,笊篱\n时间: 1分钟\n\n### 第9步\n步骤: 步骤9\n描述: 锅中加入 5ml 食用油，小火煸炒蒜瓣至发黄，下入红油豆瓣酱煸炒出香，下入白糖炒融化，下入花椒碎，加 40ml 清水，不停搅拌至酱汁粘稠。\n方法: 炒,煸炒,搅拌\n工具: 锅,锅铲\n\n### 第10步\n步骤: 步骤10\n描述: 下入炸好的鸡块、土豆块、青椒片，搅拌均匀后出锅。\n方法: 炒,搅拌\n工具: 锅,锅铲\n\n相关信息: Recipe, 荤菜, 荤菜",
+        "metadata": {
+          "node_id": "201002575",
+          "recipe_name": "干煸仔鸡",
+          "node_type": "Recipe",
+          "category": "荤菜",
+          "cuisine_type": "川菜",
+          "difficulty": 4,
+          "doc_type": "chunk",
+          "chunk_id": "201002575_chunk_521",
+          "parent_id": "201002575",
+          "score": 0.6259514689445496,
+          "search_type": "vector_enhanced"
+        }
+      },
+      {
+        "text": "## 制作步骤\n\n### 第1步\n步骤: 步骤1\n描述: 姜切片，1颗小葱切段，15颗花椒备用\n方法: 切\n工具: 刀,案板\n时间: 2分钟\n\n### 第2步\n步骤: 步骤2\n描述: 鸡肉洗净，放入锅中，加清水没过鸡肉，放入姜片、葱段和花椒，大火烧开\n方法: 煮\n工具: 锅\n时间: 5分钟\n\n### 第3步\n步骤: 步骤3\n描述: 水开后转中小火煮20分钟，关火\n方法: 煮\n工具: 锅\n时间: 20分钟\n\n### 第4步\n步骤: 步骤4\n描述: 取出鸡肉，放入冰水中迅速冷却至冰凉\n方法: 冷却\n工具: 盆,冰水\n时间: 5分钟\n\n### 第5步\n步骤: 步骤5\n描述: 取出鸡肉，切块摆盘备用\n方法: 切\n工具: 刀,案板,盘子\n时间: 3分钟\n\n### 第6步\n步骤: 步骤6\n描述: 小火将锅烧热，倒入花生，烘烤至表皮爆裂，注意翻动防糊\n方法: 炒,烘烤\n工具: 锅,锅铲\n时间: 3-4分钟\n\n### 第7步\n步骤: 步骤7\n描述: 一颗葱切段，蒜拍末，花椒15颗，花生去皮后切碎\n方法: 切,拍\n工具: 刀,案板\n时间: 2分钟\n\n### 第8步\n步骤: 步骤8\n描述: 锅内倒油烧热，放入葱段、花椒和一半蒜末炒香\n方法: 炒\n工具: 锅,锅铲\n时间: 1分钟\n\n### 第9步\n步骤: 步骤9\n描述: 油温升至8成热后关火，滤出热油\n方法: 炸,过滤\n工具: 锅,滤网,碗\n时间: 30秒\n\n### 第10步\n步骤: 步骤10\n描述: 将热油倒入盛辣椒粉的碗中，搅拌并滤出红油\n方法: 炸,搅拌,过滤\n工具: 碗,筷子,滤网\n时间: 1分钟\n\n### 第11步\n步骤: 步骤11\n描述: 在红油中加入剩余蒜末、生抽、醋、盐、味精、糖、香油、花椒粉，拌匀放凉\n方法: 搅拌\n工具: 碗,筷子\n时间: 2分钟\n\n### 第12步\n步骤: 步骤12\n描述: 鸡肉上撒花生碎，淋红油，撒香菜即成\n方法: 淋,撒\n工具: 勺子,盘子\n时间: 1分钟\n\n相关信息: Recipe, 荤菜, 荤菜",
+        "metadata": {
+          "node_id": "201002255",
+          "recipe_name": "口水鸡",
+          "node_type": "Recipe",
+          "category": "荤菜",
+          "cuisine_type": "川菜",
+          "difficulty": 3,
+          "doc_type": "chunk",
+          "chunk_id": "201002255_chunk_465",
+          "parent_id": "201002255",
+          "score": 0.6090230345726013,
+          "search_type": "vector_enhanced"
+        }
+      },
+      {
+        "text": "## 制作步骤\n\n### 第1步\n步骤: 步骤1\n描述: 四个鸡腿清洗干净，放入碗中\n方法: 清洗\n工具: 碗\n\n### 第2步\n步骤: 步骤2\n描述: 碗中加入盐焗鸡粉和5ml油，搅拌均匀\n方法: 搅拌\n工具: 碗,筷子或勺子\n\n### 第3步\n步骤: 步骤3\n描述: 让鸡腿静置腌制15分钟，同时准备蒸锅并把水煮开\n方法: 腌制\n工具: 蒸锅\n时间: 15分钟\n\n### 第4步\n步骤: 步骤4\n描述: 鸡腿腌制完成后，放入水开后的蒸锅中，蒸制20分钟\n方法: 蒸\n工具: 蒸锅\n时间: 20分钟\n\n### 第5步\n步骤: 步骤5\n描述: 将姜根据个人口味切成1）姜蓉或2）姜丝或3）姜粒\n方法: 切\n工具: 刀,案板\n\n### 第6步\n步骤: 步骤6\n描述: 将葱切成0.5cm小段\n方法: 切\n工具: 刀,案板\n\n### 第7步\n步骤: 步骤7\n描述: 将葱姜放入蘸料碗，并加入盐和糖\n方法: 混合\n工具: 碗\n\n### 第8步\n步骤: 步骤8\n描述: 将剩余的油倒入另一个锅中加热至六至七层热\n方法: 加热\n工具: 锅\n\n### 第9步\n步骤: 步骤9\n描述: 将热油淋入葱姜碗中\n方法: 淋油\n工具: 锅,碗\n\n### 第10步\n步骤: 步骤10\n描述: 鸡腿蒸好后将其撕碎成鸡丝，不需要特别细，大概1cm粗就可以\n方法: 撕\n工具: 筷子或手\n\n### 第11步\n步骤: 步骤11\n描述: 将葱姜油淋在鸡丝上，搅拌均匀即可\n方法: 搅拌\n工具: 碗,筷子或勺子\n\n相关信息: Recipe, 荤菜, 三星",
+        "metadata": {
+          "node_id": "201002434",
+          "recipe_name": "姜葱捞鸡",
+          "node_type": "Recipe",
+          "category": "荤菜",
+          "cuisine_type": "粤菜",
+          "difficulty": 3,
+          "doc_type": "chunk",
+          "chunk_id": "201002434_chunk_497",
+          "parent_id": "201002434",
+          "score": 0.5951153635978699,
+          "search_type": "vector_enhanced"
+        }
+      }
+    ]
+  },
+  {
+    "case": "chain-1",
+    "stage": "dual_level_retrieval.output",
+    "result": [
+      {
+        "text": "菜品名称: 宫保鸡丁\n分类: 荤菜\n菜系: 川菜\n难度: 4.0\n相关信息: Recipe, 荤菜",
+        "metadata": {
+          "node_id": "201002454",
+          "node_type": "Recipe",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "宫保鸡丁",
+          "search_type": "dual_level",
+          "entity_name": "宫保鸡丁",
+          "entity_type": "Recipe",
+          "index_keys": [
+            "宫保鸡丁"
+          ],
+          "matched_keyword": "宫保鸡丁"
+        }
+      },
+      {
+        "text": "食材名称: 鸡胸肉\n类别: 蛋白质\n\n补充信息: 食材名称: 鸡胸肉\n类别: 蛋白质\n相关信息: Ingredient, 蛋白质",
+        "metadata": {
+          "node_id": "201002204",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "鸡胸肉",
+          "search_type": "dual_level",
+          "entity_name": "鸡胸肉",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "鸡胸肉"
+          ],
+          "matched_keyword": "鸡胸肉"
+        }
+      },
+      {
+        "text": "食材名称: 鸡腿肉\n类别: 蛋白质\n\n补充信息: 食材名称: 鸡腿肉\n类别: 蛋白质\n\n补充信息: 食材名称: 鸡腿肉\n类别: 蛋白质\n相关信息: Ingredient, 蛋白质",
+        "metadata": {
+          "node_id": "201001686",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "鸡腿肉",
+          "search_type": "dual_level",
+          "entity_name": "鸡腿肉",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "鸡腿肉"
+          ],
+          "matched_keyword": "鸡腿肉"
+        }
+      },
+      {
+        "text": "食材名称: 干辣椒\n类别: 蔬菜\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 蔬菜\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n相关信息: Ingredient, 蔬菜",
+        "metadata": {
+          "node_id": "201000077",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "干辣椒",
+          "search_type": "dual_level",
+          "entity_name": "干辣椒",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "干辣椒"
+          ],
+          "matched_keyword": "干辣椒"
+        }
+      },
+      {
+        "text": "食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n相关信息: Ingredient, 调料",
+        "metadata": {
+          "node_id": "201000167",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "花椒",
+          "search_type": "dual_level",
+          "entity_name": "花椒",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "花椒"
+          ],
+          "matched_keyword": "花椒"
+        }
+      }
+    ]
+  },
+  {
+    "case": "chain-1",
+    "stage": "hybrid_search.output",
+    "result": [
+      {
+        "text": "菜品名称: 宫保鸡丁\n分类: 荤菜\n菜系: 川菜\n难度: 4.0\n相关信息: Recipe, 荤菜",
+        "metadata": {
+          "node_id": "201002454",
+          "node_type": "Recipe",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "宫保鸡丁",
+          "search_type": "dual_level",
+          "entity_name": "宫保鸡丁",
+          "entity_type": "Recipe",
+          "index_keys": [
+            "宫保鸡丁"
+          ],
+          "matched_keyword": "宫保鸡丁",
+          "search_method": "dual_level",
+          "round_robin_order": 0,
+          "final_score": 0.9
+        }
+      },
+      {
+        "text": "食材名称: 鸡胸肉\n类别: 蛋白质\n\n补充信息: 食材名称: 鸡胸肉\n类别: 蛋白质\n相关信息: Ingredient, 蛋白质",
+        "metadata": {
+          "node_id": "201002204",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "鸡胸肉",
+          "search_type": "dual_level",
+          "entity_name": "鸡胸肉",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "鸡胸肉"
+          ],
+          "matched_keyword": "鸡胸肉",
+          "search_method": "dual_level",
+          "round_robin_order": 1,
+          "final_score": 0.9
+        }
+      },
+      {
+        "text": "食材名称: 鸡腿肉\n类别: 蛋白质\n\n补充信息: 食材名称: 鸡腿肉\n类别: 蛋白质\n\n补充信息: 食材名称: 鸡腿肉\n类别: 蛋白质\n相关信息: Ingredient, 蛋白质",
+        "metadata": {
+          "node_id": "201001686",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "鸡腿肉",
+          "search_type": "dual_level",
+          "entity_name": "鸡腿肉",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "鸡腿肉"
+          ],
+          "matched_keyword": "鸡腿肉",
+          "search_method": "dual_level",
+          "round_robin_order": 2,
+          "final_score": 0.9
+        }
+      },
+      {
+        "text": "## 制作步骤\n\n### 第1步\n步骤: 步骤1\n描述: 鸡腿去骨（如使用鸡腿排可忽略此步骤），鸡腿肉用刀背砸一砸，切成 2cm 的块。\n方法: 切,去骨\n工具: 刀,案板\n\n### 第2步\n步骤: 步骤2\n描述: 鸡腿肉中加入盐、鸡精（可选）、胡椒粉、生抽、老抽、料酒，抓拌至粘手时加入淀粉拌匀，加入食用油防止粘连，腌制 30 分钟。\n方法: 腌制,抓拌\n工具: 盆,筷子\n时间: 30分钟\n\n### 第3步\n步骤: 步骤3\n描述: 土豆去皮，切成 2cm 的块，沸水煮 5 分钟后捞出，控干水分，防止油炸时爆锅。\n方法: 切,煮\n工具: 刀,案板,锅,笊篱\n时间: 5分钟\n\n### 第4步\n步骤: 步骤4\n描述: 青椒去籽，切成 2cm 小片，放在笊篱中备用。\n方法: 切,去籽\n工具: 刀,案板,笊篱\n\n### 第5步\n步骤: 步骤5\n描述: 锅中加入宽油（根据锅的形状，能没过食材即可），油温烧至 180℃ 时，下入土豆块炸 3 分钟后捞出。\n方法: 炸\n工具: 锅,笊篱\n时间: 3分钟\n\n### 第6步\n步骤: 步骤6\n描述: 待油温再次升高到 180℃时，下入鸡块炸 2 分钟后捞出。\n方法: 炸\n工具: 锅,笊篱\n时间: 2分钟\n\n### 第7步\n步骤: 步骤7\n描述: 待油温再次升高到 180℃时，下入鸡块复炸 1 分钟后捞出。\n方法: 炸\n工具: 锅,笊篱\n时间: 1分钟\n\n### 第8步\n步骤: 步骤8\n描述: 待油温再次升高到 180℃时，下入土豆块复炸 1 分钟后，将锅中的油和土豆块经过笊篱过滤倒出，让笊篱上的青椒片断生。\n方法: 炸,过滤\n工具: 锅,笊篱\n时间: 1分钟\n\n### 第9步\n步骤: 步骤9\n描述: 锅中加入 5ml 食用油，小火煸炒蒜瓣至发黄，下入红油豆瓣酱煸炒出香，下入白糖炒融化，下入花椒碎，加 40ml 清水，不停搅拌至酱汁粘稠。\n方法: 炒,煸炒,搅拌\n工具: 锅,锅铲\n\n### 第10步\n步骤: 步骤10\n描述: 下入炸好的鸡块、土豆块、青椒片，搅拌均匀后出锅。\n方法: 炒,搅拌\n工具: 锅,锅铲\n\n相关信息: Recipe, 荤菜, 荤菜",
+        "metadata": {
+          "node_id": "201002575",
+          "recipe_name": "干煸仔鸡",
+          "node_type": "Recipe",
+          "category": "荤菜",
+          "cuisine_type": "川菜",
+          "difficulty": 4,
+          "doc_type": "chunk",
+          "chunk_id": "201002575_chunk_521",
+          "parent_id": "201002575",
+          "score": 0.6259514689445496,
+          "search_type": "vector_enhanced",
+          "search_method": "vector_enhanced",
+          "round_robin_order": 3,
+          "final_score": 0.37404853105545044
+        }
+      },
+      {
+        "text": "食材名称: 干辣椒\n类别: 蔬菜\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 蔬菜\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n\n补充信息: 食材名称: 干辣椒\n类别: 调料\n相关信息: Ingredient, 蔬菜",
+        "metadata": {
+          "node_id": "201000077",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "干辣椒",
+          "search_type": "dual_level",
+          "entity_name": "干辣椒",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "干辣椒"
+          ],
+          "matched_keyword": "干辣椒",
+          "search_method": "dual_level",
+          "round_robin_order": 4,
+          "final_score": 0.9
+        }
+      }
+    ]
+  },
+  {
+    "case": "isolated-mapo",
+    "stage": "vector_search_enhanced.output",
+    "result": [
+      {
+        "text": "# 麻婆豆腐\n\n菜系: 川菜\n难度: 3.0星\n\n时间信息: 准备时间: 约10分钟, 烹饪时间: 约12分钟\n份量: 1人份\n\n相关信息: Recipe, 荤菜, 荤菜",
+        "metadata": {
+          "node_id": "201003481",
+          "recipe_name": "麻婆豆腐",
+          "node_type": "Recipe",
+          "category": "荤菜",
+          "cuisine_type": "川菜",
+          "difficulty": 3,
+          "doc_type": "chunk",
+          "chunk_id": "201003481_chunk_682",
+          "parent_id": "201003481",
+          "score": 0.6973898410797119,
+          "search_type": "vector_enhanced"
+        }
+      },
+      {
+        "text": "## 制作步骤\n\n### 第1步\n步骤: 步骤1\n描述: 将豆腐切成2 cm见方的小块，备用。\n方法: 切\n工具: 刀,案板\n\n### 第2步\n步骤: 步骤2\n描述: 锅中加入500 ml饮用水，大火烧开。\n方法: 煮\n工具: 锅\n\n### 第3步\n步骤: 步骤3\n描述: 放入豆腐块，煮1-2分钟，以去除豆腥味并使豆腐口感更紧实。\n方法: 煮\n工具: 锅\n时间: 1-2分钟\n\n### 第4步\n步骤: 步骤4\n描述: 将煮好的豆腐块捞出，沥干水分，放入碗中，备用。\n方法: 捞,沥\n工具: 漏勺,碗\n\n### 第5步\n步骤: 步骤5\n描述: 将小葱洗净，切成葱花，备用。\n方法: 洗,切\n工具: 刀,案板\n\n### 第6步\n步骤: 步骤6\n描述: 将大蒜去皮，切成蒜末，备用。\n方法: 去皮,切\n工具: 刀,案板\n\n### 第7步\n步骤: 步骤7\n描述: 在一个干净的小碗中，加入15 ml生抽，5 ml香油，5 ml醋（可选），2 g白糖（可选）。\n方法: 混合\n工具: 小碗\n\n### 第8步\n步骤: 步骤8\n描述: 加入切好的大蒜末。\n方法: 混合\n工具: 小碗\n\n### 第9步\n步骤: 步骤9\n描述: 搅拌均匀，使白糖充分溶解，酱汁混合均匀。\n方法: 搅拌\n工具: 筷子,小碗\n\n### 第10步\n步骤: 步骤10\n描述: 将制作好的酱汁均匀淋在豆腐块上。\n方法: 淋\n工具: 碗\n\n### 第11步\n步骤: 步骤11\n描述: 撒上切好的小葱花。\n方法: 撒\n工具: 碗\n\n### 第12步\n步骤: 步骤12\n描述: 根据个人喜好，淋上5 ml辣椒油（可选）。\n方法: 淋\n工具: 碗\n\n### 第13步\n步骤: 步骤13\n描述: 用筷子或勺子轻轻拌匀，即可食用。\n方法: 拌\n工具: 筷子,勺子,碗\n\n相关信息: Recipe, 素菜, 二星",
+        "metadata": {
+          "node_id": "201004841",
+          "recipe_name": "凉拌豆腐",
+          "node_type": "Recipe",
+          "category": "素菜",
+          "cuisine_type": "未知",
+          "difficulty": 2,
+          "doc_type": "chunk",
+          "chunk_id": "201004841_chunk_958",
+          "parent_id": "201004841",
+          "score": 0.6922955513000488,
+          "search_type": "vector_enhanced"
+        }
+      },
+      {
+        "text": "## 制作步骤\n\n### 第1步\n步骤: 步骤1\n描述: 豆腐洗净，切成约5 mm厚片，置于碟中备用。\n方法: 切\n工具: 刀,碟子\n时间: 2-3分钟\n\n### 第2步\n步骤: 步骤2\n描述: 葱洗净，去根后切成葱花备用。\n方法: 切\n工具: 刀,案板\n时间: 1分钟\n\n### 第3步\n步骤: 步骤3\n描述: 青辣椒洗净，切开去籽后切成1 cm×1 cm小块备用。\n方法: 切\n工具: 刀,案板\n时间: 1-2分钟\n\n### 第4步\n步骤: 步骤4\n描述: 平底锅加热，倒入9 ml食用油，使油均匀铺满锅底。\n方法: 加热\n工具: 平底锅\n时间: 30秒\n\n### 第5步\n步骤: 步骤5\n描述: 均匀放入豆腐片，小火煎至一面金黄后翻面继续煎至两面金黄。\n方法: 煎\n工具: 平底锅,锅铲\n时间: 3-4分钟\n\n### 第6步\n步骤: 步骤6\n描述: 将煎好的豆腐盛出备用。\n方法: 盛出\n工具: 锅铲,碟子\n时间: 10秒\n\n### 第7步\n步骤: 步骤7\n描述: 补油至覆盖锅底，倒入辣椒块，大火翻炒并用锅铲碾压3分钟。\n方法: 炒,碾压\n工具: 锅铲,平底锅\n时间: 3分钟\n\n### 第8步\n步骤: 步骤8\n描述: 倒入煎好的豆腐，加入盐与鸡精，中火翻炒1分钟后加入10 ml水，大火收汁。\n方法: 炒,收汁\n工具: 锅铲,平底锅\n时间: 2分钟\n\n### 第9步\n步骤: 步骤9\n描述: 出锅前撒上葱花，起锅盛盘即可。\n方法: 撒,盛盘\n工具: 锅铲,盘子\n时间: 20秒\n相关信息: Recipe, 素菜, 三星",
+        "metadata": {
+          "node_id": "201005112",
+          "recipe_name": "葱煎豆腐",
+          "node_type": "Recipe",
+          "category": "素菜",
+          "cuisine_type": "未知",
+          "difficulty": 3,
+          "doc_type": "chunk",
+          "chunk_id": "201005112_chunk_1013",
+          "parent_id": "201005112",
+          "score": 0.6782100796699524,
+          "search_type": "vector_enhanced"
+        }
+      },
+      {
+        "text": "## 制作步骤\n\n### 第1步\n步骤: 步骤1\n描述: 鸡蛋搅拌形成蛋液放置备用\n方法: 搅拌\n工具: 碗,筷子\n时间: 1分钟\n\n### 第2步\n步骤: 步骤2\n描述: 配置酱料：20 g 生抽+10 g 蚝油+5 g 老抽+10 g 白糖+10 g 玉米淀粉+200 ml 清水，搅拌均匀\n方法: 搅拌\n工具: 碗,筷子\n时间: 1分钟\n\n### 第3步\n步骤: 步骤3\n描述: 老豆腐切片，每块豆腐切5片，厚度约1.2 cm\n方法: 切\n工具: 刀,案板\n时间: 2分钟\n\n### 第4步\n步骤: 步骤4\n描述: 玉米淀粉倒入盘中，将老豆腐片先粘上淀粉，再粘上蛋液，放置一旁备用\n方法: 裹粉\n工具: 盘,筷子\n时间: 3分钟\n\n### 第5步\n步骤: 步骤5\n描述: 热锅，倒入18 ml食用油，等待10秒让油温升高\n方法: 热锅\n工具: 平底锅\n时间: 10秒\n\n### 第6步\n步骤: 步骤6\n描述: 将裹好蛋液的老豆腐片均匀放入锅中，小火煎至一面金黄后翻面\n方法: 煎\n工具: 平底锅,锅铲\n时间: 3-4分钟\n\n### 第7步\n步骤: 步骤7\n描述: 待两面均煎至金黄后，倒入调好的酱料，让每块豆腐都裹满酱汁，大火煮3分钟至酱汁浓稠\n方法: 煮,收汁\n工具: 平底锅,锅铲\n时间: 3分钟\n\n### 第8步\n步骤: 步骤8\n描述: 关火，出锅装盘\n方法: 关火\n工具: 锅铲\n时间: 10秒\n相关信息: Recipe, 素菜, 三星",
+        "metadata": {
+          "node_id": "201005074",
+          "recipe_name": "脆皮豆腐",
+          "node_type": "Recipe",
+          "category": "素菜",
+          "cuisine_type": "未知",
+          "difficulty": 3,
+          "doc_type": "chunk",
+          "chunk_id": "201005074_chunk_1006",
+          "parent_id": "201005074",
+          "score": 0.6625204086303711,
+          "search_type": "vector_enhanced"
+        }
+      },
+      {
+        "text": "# 金针菇日本豆腐煲\n难度: 2.0星\n\n时间信息: 准备时间: 5-10分钟, 烹饪时间: 10-15分钟\n份量: 1人份\n\n## 所需食材\n1. 小米椒(3-5根)\n2. 日本豆腐(2袋)\n3. 水(100毫升)\n4. 生抽(15毫升)\n5. 糖(3克)\n6. 老抽(3毫升)\n7. 蒜(2-3瓣)\n8. 蚝油(5毫升)\n9. 金针菇(1-2把)\n10. 食用油(10-15毫升)\n\n## 制作步骤\n\n### 第1步\n步骤: 步骤1\n描述: 豆腐切片，小火煎到两面金黄出锅备用。\n方法: 切,煎\n工具: 刀,平底锅,锅铲\n时间: 3-5分钟\n\n### 第2步\n步骤: 步骤2\n描述: 切蒜成蒜末；将生抽、蚝油、老抽、糖、100ml水调汁备用。\n方法: 切,调汁\n工具: 刀,案板,小碗\n时间: 2分钟\n\n### 第3步\n步骤: 步骤3\n描述: 热锅放油，油热放小米椒、蒜末爆香，先放金针菇，炒软，把煎好的豆腐平铺在金针菇上，倒入步骤2配好的料汁，焖5分钟，大火收汁。\n方法: 炒,焖,收汁\n工具: 炒锅,锅铲\n时间: 8-10分钟\n\n## 标签\n金针菇一定要先炒软,豆腐尽量不要翻炒，容易碎\n相关信息: Recipe, 素菜, 素菜",
+        "metadata": {
+          "node_id": "201005212",
+          "recipe_name": "金针菇日本豆腐煲",
+          "node_type": "Recipe",
+          "category": "素菜",
+          "cuisine_type": "未知",
+          "difficulty": 2,
+          "doc_type": "chunk",
+          "chunk_id": "201005212_chunk_1034",
+          "parent_id": "201005212",
+          "score": 0.6465119123458862,
+          "search_type": "vector_enhanced"
+        }
+      }
+    ]
+  },
+  {
+    "case": "isolated-mapo",
+    "stage": "dual_level_retrieval.output",
+    "result": [
+      {
+        "text": "菜品名称: 麻婆豆腐\n分类: 荤菜\n菜系: 川菜\n难度: 3.0\n相关信息: Recipe, 荤菜",
+        "metadata": {
+          "node_id": "201003481",
+          "node_type": "Recipe",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "麻婆豆腐",
+          "search_type": "dual_level",
+          "entity_name": "麻婆豆腐",
+          "entity_type": "Recipe",
+          "index_keys": [
+            "麻婆豆腐"
+          ],
+          "matched_keyword": "麻婆豆腐"
+        }
+      },
+      {
+        "text": "食材名称: 豆腐\n类别: 蛋白质\n\n补充信息: 食材名称: 豆腐\n类别: 蛋白质\n\n补充信息: 食材名称: 豆腐\n类别: 蛋白质\n相关信息: Ingredient, 蛋白质",
+        "metadata": {
+          "node_id": "201003918",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "豆腐",
+          "search_type": "dual_level",
+          "entity_name": "豆腐",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "豆腐"
+          ],
+          "matched_keyword": "豆腐"
+        }
+      },
+      {
+        "text": "食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n相关信息: Ingredient, 调料",
+        "metadata": {
+          "node_id": "201000242",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "豆瓣酱",
+          "search_type": "dual_level",
+          "entity_name": "豆瓣酱",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "豆瓣酱"
+          ],
+          "matched_keyword": "豆瓣酱"
+        }
+      },
+      {
+        "text": "食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n\n补充信息: 食材名称: 花椒\n类别: 调料\n相关信息: Ingredient, 调料",
+        "metadata": {
+          "node_id": "201000167",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "花椒",
+          "search_type": "dual_level",
+          "entity_name": "花椒",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "花椒"
+          ],
+          "matched_keyword": "花椒"
+        }
+      },
+      {
+        "text": "食材名称: 辣椒\n类别: 蔬菜\n\n补充信息: 食材名称: 辣椒\n类别: 蔬菜\n\n补充信息: 食材名称: 辣椒\n类别: 蔬菜\n相关信息: Ingredient, 蔬菜",
+        "metadata": {
+          "node_id": "201003180",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "辣椒",
+          "search_type": "dual_level",
+          "entity_name": "辣椒",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "辣椒"
+          ],
+          "matched_keyword": "辣椒"
+        }
+      }
+    ]
+  },
+  {
+    "case": "isolated-mapo",
+    "stage": "hybrid_search.output",
+    "result": [
+      {
+        "text": "菜品名称: 麻婆豆腐\n分类: 荤菜\n菜系: 川菜\n难度: 3.0\n相关信息: Recipe, 荤菜",
+        "metadata": {
+          "node_id": "201003481",
+          "node_type": "Recipe",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "麻婆豆腐",
+          "search_type": "dual_level",
+          "entity_name": "麻婆豆腐",
+          "entity_type": "Recipe",
+          "index_keys": [
+            "麻婆豆腐"
+          ],
+          "matched_keyword": "麻婆豆腐",
+          "search_method": "dual_level",
+          "round_robin_order": 0,
+          "final_score": 0.9
+        }
+      },
+      {
+        "text": "食材名称: 豆腐\n类别: 蛋白质\n\n补充信息: 食材名称: 豆腐\n类别: 蛋白质\n\n补充信息: 食材名称: 豆腐\n类别: 蛋白质\n相关信息: Ingredient, 蛋白质",
+        "metadata": {
+          "node_id": "201003918",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "豆腐",
+          "search_type": "dual_level",
+          "entity_name": "豆腐",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "豆腐"
+          ],
+          "matched_keyword": "豆腐",
+          "search_method": "dual_level",
+          "round_robin_order": 1,
+          "final_score": 0.9
+        }
+      },
+      {
+        "text": "## 制作步骤\n\n### 第1步\n步骤: 步骤1\n描述: 将豆腐切成2 cm见方的小块，备用。\n方法: 切\n工具: 刀,案板\n\n### 第2步\n步骤: 步骤2\n描述: 锅中加入500 ml饮用水，大火烧开。\n方法: 煮\n工具: 锅\n\n### 第3步\n步骤: 步骤3\n描述: 放入豆腐块，煮1-2分钟，以去除豆腥味并使豆腐口感更紧实。\n方法: 煮\n工具: 锅\n时间: 1-2分钟\n\n### 第4步\n步骤: 步骤4\n描述: 将煮好的豆腐块捞出，沥干水分，放入碗中，备用。\n方法: 捞,沥\n工具: 漏勺,碗\n\n### 第5步\n步骤: 步骤5\n描述: 将小葱洗净，切成葱花，备用。\n方法: 洗,切\n工具: 刀,案板\n\n### 第6步\n步骤: 步骤6\n描述: 将大蒜去皮，切成蒜末，备用。\n方法: 去皮,切\n工具: 刀,案板\n\n### 第7步\n步骤: 步骤7\n描述: 在一个干净的小碗中，加入15 ml生抽，5 ml香油，5 ml醋（可选），2 g白糖（可选）。\n方法: 混合\n工具: 小碗\n\n### 第8步\n步骤: 步骤8\n描述: 加入切好的大蒜末。\n方法: 混合\n工具: 小碗\n\n### 第9步\n步骤: 步骤9\n描述: 搅拌均匀，使白糖充分溶解，酱汁混合均匀。\n方法: 搅拌\n工具: 筷子,小碗\n\n### 第10步\n步骤: 步骤10\n描述: 将制作好的酱汁均匀淋在豆腐块上。\n方法: 淋\n工具: 碗\n\n### 第11步\n步骤: 步骤11\n描述: 撒上切好的小葱花。\n方法: 撒\n工具: 碗\n\n### 第12步\n步骤: 步骤12\n描述: 根据个人喜好，淋上5 ml辣椒油（可选）。\n方法: 淋\n工具: 碗\n\n### 第13步\n步骤: 步骤13\n描述: 用筷子或勺子轻轻拌匀，即可食用。\n方法: 拌\n工具: 筷子,勺子,碗\n\n相关信息: Recipe, 素菜, 二星",
+        "metadata": {
+          "node_id": "201004841",
+          "recipe_name": "凉拌豆腐",
+          "node_type": "Recipe",
+          "category": "素菜",
+          "cuisine_type": "未知",
+          "difficulty": 2,
+          "doc_type": "chunk",
+          "chunk_id": "201004841_chunk_958",
+          "parent_id": "201004841",
+          "score": 0.6922955513000488,
+          "search_type": "vector_enhanced",
+          "search_method": "vector_enhanced",
+          "round_robin_order": 2,
+          "final_score": 0.30770444869995117
+        }
+      },
+      {
+        "text": "食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n\n补充信息: 食材名称: 豆瓣酱\n类别: 调料\n相关信息: Ingredient, 调料",
+        "metadata": {
+          "node_id": "201000242",
+          "node_type": "Ingredient",
+          "retrieval_level": "entity",
+          "relevance_score": 0.9,
+          "recipe_name": "豆瓣酱",
+          "search_type": "dual_level",
+          "entity_name": "豆瓣酱",
+          "entity_type": "Ingredient",
+          "index_keys": [
+            "豆瓣酱"
+          ],
+          "matched_keyword": "豆瓣酱",
+          "search_method": "dual_level",
+          "round_robin_order": 3,
+          "final_score": 0.9
+        }
+      },
+      {
+        "text": "## 制作步骤\n\n### 第1步\n步骤: 步骤1\n描述: 豆腐洗净，切成约5 mm厚片，置于碟中备用。\n方法: 切\n工具: 刀,碟子\n时间: 2-3分钟\n\n### 第2步\n步骤: 步骤2\n描述: 葱洗净，去根后切成葱花备用。\n方法: 切\n工具: 刀,案板\n时间: 1分钟\n\n### 第3步\n步骤: 步骤3\n描述: 青辣椒洗净，切开去籽后切成1 cm×1 cm小块备用。\n方法: 切\n工具: 刀,案板\n时间: 1-2分钟\n\n### 第4步\n步骤: 步骤4\n描述: 平底锅加热，倒入9 ml食用油，使油均匀铺满锅底。\n方法: 加热\n工具: 平底锅\n时间: 30秒\n\n### 第5步\n步骤: 步骤5\n描述: 均匀放入豆腐片，小火煎至一面金黄后翻面继续煎至两面金黄。\n方法: 煎\n工具: 平底锅,锅铲\n时间: 3-4分钟\n\n### 第6步\n步骤: 步骤6\n描述: 将煎好的豆腐盛出备用。\n方法: 盛出\n工具: 锅铲,碟子\n时间: 10秒\n\n### 第7步\n步骤: 步骤7\n描述: 补油至覆盖锅底，倒入辣椒块，大火翻炒并用锅铲碾压3分钟。\n方法: 炒,碾压\n工具: 锅铲,平底锅\n时间: 3分钟\n\n### 第8步\n步骤: 步骤8\n描述: 倒入煎好的豆腐，加入盐与鸡精，中火翻炒1分钟后加入10 ml水，大火收汁。\n方法: 炒,收汁\n工具: 锅铲,平底锅\n时间: 2分钟\n\n### 第9步\n步骤: 步骤9\n描述: 出锅前撒上葱花，起锅盛盘即可。\n方法: 撒,盛盘\n工具: 锅铲,盘子\n时间: 20秒\n相关信息: Recipe, 素菜, 三星",
+        "metadata": {
+          "node_id": "201005112",
+          "recipe_name": "葱煎豆腐",
+          "node_type": "Recipe",
+          "category": "素菜",
+          "cuisine_type": "未知",
+          "difficulty": 3,
+          "doc_type": "chunk",
+          "chunk_id": "201005112_chunk_1013",
+          "parent_id": "201005112",
+          "score": 0.6782100796699524,
+          "search_type": "vector_enhanced",
+          "search_method": "vector_enhanced",
+          "round_robin_order": 4,
+          "final_score": 0.3217899203300476
+        }
+      }
+    ]
+  }
+]

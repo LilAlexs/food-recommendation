@@ -1,0 +1,13 @@
+{
+  "base_url": "http://127.0.0.1:8000",
+  "model": "unverified",
+  "top_k": 5,
+  "cache_state": "uncontrolled",
+  "repeat": 1,
+  "concurrency": 1,
+  "started_at_unix": 1792631431.0178237,
+  "dataset_sha256": "24597c1551e29439ea60c0f5d9c56e86563571bc147dc54327c9a5053e21ba24",
+  "note": "Model/top_k/cache state are operator declarations. /health is shallow; initialization failures may occur later.",
+  "status": "blocked",
+  "error_type": "URLError"
+}

@@ -1,0 +1,6 @@
+# Merge after the original Compose and compose.llm-diagnostics.yml.
+services:
+  backend:
+    environment:
+      RAG_ADAPTIVE_CONTEXT: ${RAG_ADAPTIVE_CONTEXT:-0}
+      RAG_FAST_SIMPLE_QUERY: ${RAG_FAST_SIMPLE_QUERY:-0}

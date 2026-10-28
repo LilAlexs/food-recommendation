@@ -1,0 +1,123 @@
+{
+  "collection_name": "cooking_knowledge",
+  "auto_id": false,
+  "num_shards": 1,
+  "description": "中式烹饪知识图谱向量集合",
+  "fields": [
+    {
+      "field_id": 100,
+      "name": "id",
+      "description": "",
+      "type": 21,
+      "params": {
+        "max_length": 150
+      },
+      "is_primary": true
+    },
+    {
+      "field_id": 101,
+      "name": "vector",
+      "description": "",
+      "type": 101,
+      "params": {
+        "dim": 512
+      }
+    },
+    {
+      "field_id": 102,
+      "name": "text",
+      "description": "",
+      "type": 21,
+      "params": {
+        "max_length": 15000
+      }
+    },
+    {
+      "field_id": 103,
+      "name": "node_id",
+      "description": "",
+      "type": 21,
+      "params": {
+        "max_length": 100
+      }
+    },
+    {
+      "field_id": 104,
+      "name": "recipe_name",
+      "description": "",
+      "type": 21,
+      "params": {
+        "max_length": 300
+      }
+    },
+    {
+      "field_id": 105,
+      "name": "node_type",
+      "description": "",
+      "type": 21,
+      "params": {
+        "max_length": 100
+      }
+    },
+    {
+      "field_id": 106,
+      "name": "category",
+      "description": "",
+      "type": 21,
+      "params": {
+        "max_length": 100
+      }
+    },
+    {
+      "field_id": 107,
+      "name": "cuisine_type",
+      "description": "",
+      "type": 21,
+      "params": {
+        "max_length": 200
+      }
+    },
+    {
+      "field_id": 108,
+      "name": "difficulty",
+      "description": "",
+      "type": 5,
+      "params": {}
+    },
+    {
+      "field_id": 109,
+      "name": "doc_type",
+      "description": "",
+      "type": 21,
+      "params": {
+        "max_length": 50
+      }
+    },
+    {
+      "field_id": 110,
+      "name": "chunk_id",
+      "description": "",
+      "type": 21,
+      "params": {
+        "max_length": 150
+      }
+    },
+    {
+      "field_id": 111,
+      "name": "parent_id",
+      "description": "",
+      "type": 21,
+      "params": {
+        "max_length": 100
+      }
+    }
+  ],
+  "functions": [],
+  "aliases": [],
+  "collection_id": 469839627479418163,
+  "consistency_level": 0,
+  "properties": {},
+  "num_partitions": 1,
+  "enable_dynamic_field": false,
+  "created_timestamp": 469839696701423621
+}

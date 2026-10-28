@@ -1,0 +1,6 @@
+﻿id,category,repeat,seed_failed,seed_trace_ids,request_scope,duration_ms,http_status,trace_id,from_cache,error_type,trace_available,application_failed,llm_calls,llm_errors,llm_timeouts,tokens_known,total_tokens,success,route.analysis_ms,graph.total_ms,vector.search_ms,hybrid.total_ms,generation_ms
+independent-01,independent,0,False,[],target,39582.10210001562,200,3839e6aea1a64ce99de5616ba2ab4590,False,,True,False,3,0,0,True,5489,True,8298.10359099065,,367.1657810045872,8196.93676501629,23032.18558500521
+independent-02,independent,0,False,[],target,29660.2023000014,200,b6b8a28abdb343ccb6eade578dcfe871,False,,True,False,3,0,0,True,6390,True,10402.234342996962,,447.32659199507907,7018.828088999726,12164.725206996081
+independent-03,independent,0,False,[],target,55439.524799992796,200,8a08d8971f264d868e2301dcc8767062,False,,True,False,3,0,0,True,5793,True,22912.58676900179,,267.602760985028,8406.833983986871,24062.860606994946
+independent-04,independent,0,False,[],target,32844.04540003743,200,33a6395a4ad14174905c56b79d3bebf4,False,,True,False,3,0,0,True,5790,True,5406.406522000907,,332.49590202467516,12540.644599008374,14819.715185993118
+independent-05,independent,0,False,[],target,53196.81980001042,200,7da3c0c2247d4bbcb8255afa5216b50c,False,,True,False,3,1,0,False,,False,4562.432194012217,,321.29319399246015,7106.055104988627,41458.060214004945

@@ -1,0 +1,15 @@
+{
+  "missing_dependencies": [
+    "flask",
+    "openai",
+    "neo4j",
+    "pymilvus",
+    "langchain_core",
+    "sentence_transformers"
+  ],
+  "localhost_ports": {
+    "8000": "unavailable",
+    "7687": "unavailable",
+    "19530": "unavailable"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "mode": "offline_replay_of_uploaded_binding_details",
+  "live_database_test": false,
+  "model_called": false,
+  "recipes": [
+    {
+      "recipe": "宫保鸡丁",
+      "status": "graph_scoped_source",
+      "graph_recipe_id": "201002454",
+      "unverified_summary_steps": 9,
+      "source_projected_chunks": 0,
+      "identity_rejected_chunks": 0,
+      "withheld_chunks": 4,
+      "vector_status": "derived_content_withheld"
+    },
+    {
+      "recipe": "麻婆豆腐",
+      "status": "graph_verified",
+      "graph_recipe_id": "201003481",
+      "unverified_summary_steps": 0,
+      "source_projected_chunks": 2,
+      "identity_rejected_chunks": 0,
+      "withheld_chunks": 2,
+      "vector_status": "source_projected"
+    },
+    {
+      "recipe": "西红柿炒鸡蛋",
+      "status": "graph_scoped_source",
+      "graph_recipe_id": "201005181",
+      "unverified_summary_steps": 6,
+      "source_projected_chunks": 1,
+      "identity_rejected_chunks": 0,
+      "withheld_chunks": 3,
+      "vector_status": "source_projected"
+    }
+  ]
+}

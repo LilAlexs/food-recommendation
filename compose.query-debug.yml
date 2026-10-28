@@ -1,0 +1,4 @@
+services:
+  backend:
+    environment:
+      RAG_TRACE_PATH: /tmp/query_debug.jsonl

@@ -1,0 +1,4 @@
+services:
+  backend:
+    environment:
+      RAG_RECIPE_GUARD: ${RAG_RECIPE_GUARD:-1}

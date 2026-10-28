@@ -1,0 +1,39 @@
+{
+  "status": "completed",
+  "dataset_sha256": "2b204ae1ae99cadad0aca313bec88fb85d325daabcbce45204d8dfb5b7577f9c",
+  "case_count": 60,
+  "candidate_k": 30,
+  "stages": {
+    "sources": {
+      "status": "ok",
+      "mismatches": 0
+    },
+    "neo4j": {
+      "status": "ok",
+      "recipes": 323,
+      "edges": 7706
+    },
+    "milvus": {
+      "status": "ok",
+      "documents": 1138,
+      "primary_field": "id",
+      "full_iterator_completed": true,
+      "snapshot_consistency": "No concurrent KB updates should occur during export; not an atomic cross-DB snapshot"
+    },
+    "vector": {
+      "status": "ok",
+      "successes": 60,
+      "total": 60,
+      "metric": "COSINE (larger is more similar)",
+      "embedding_settings": "matches uploaded project: cpu and normalize_embeddings=True; actual runtime revision still needs confirmation"
+    }
+  },
+  "notes": [
+    "No LLM calls, no writes to databases, no index rebuild",
+    "Vector candidates are raw-query only; not BM25/RRF/rerank/rewrite results",
+    "Exports contain recipe and database document content; review before sharing"
+  ],
+  "vector_requested": true,
+  "collection": "cooking_knowledge",
+  "embedding_model": "BAAI/bge-small-zh-v1.5"
+}

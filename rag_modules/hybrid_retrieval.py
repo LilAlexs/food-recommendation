@@ -1,3 +1,7 @@
+from rag_modules.context_evidence import content_key
+from rag_modules.query_preparation import simple_query, enabled
+from rag_modules.performance_monitor import event
+from rag_modules.performance_monitor import timed, llm_create, submit_context
 """
 混合检索模块
 基于双层检索范式：实体级 + 主题级检索
@@ -123,10 +127,16 @@ class HybridRetrievalModule:
             
         return relationships
             
+    @timed("hybrid.keywords")
     def extract_query_keywords(self, query: str) -> Tuple[List[str], List[str]]:
         """
         提取查询关键词：实体级 + 主题级
         """
+        plan = simple_query(query) if enabled("RAG_FAST_SIMPLE_QUERY") else None
+        if plan:
+            event(kind="analysis_decision", stage="keywords", source="rule", intent=plan.intent)
+            return [plan.dish], []
+        event(kind="analysis_decision", stage="keywords", source="llm")
         prompt = f"""
         作为烹饪知识助手，请分析以下查询并提取关键词，分为两个层次：
 
@@ -162,7 +172,7 @@ class HybridRetrievalModule:
         """
         
         try:
-            response = self.llm_client.chat.completions.create(
+            response = llm_create(self.llm_client.chat.completions.create,
                 model=self.config.llm_model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,
@@ -430,6 +440,7 @@ class HybridRetrievalModule:
             
         return results
         
+    @timed("hybrid.dual")
     def dual_level_retrieval(self, query: str, top_k: int = 5) -> List[Document]:
         """
         双层检索：结合实体级和主题级检索
@@ -451,8 +462,8 @@ class HybridRetrievalModule:
         unique_results = []
         
         for result in sorted(all_results, key=lambda x: x.relevance_score, reverse=True):
-            if result.node_id not in seen_nodes:
-                seen_nodes.add(result.node_id)
+            if (result.node_id, result.content.strip()) not in seen_nodes:
+                seen_nodes.add((result.node_id, result.content.strip()))
                 unique_results.append(result)
         
         # 5. 转换为Document格式
@@ -478,6 +489,7 @@ class HybridRetrievalModule:
         logger.info(f"双层检索完成，返回 {len(documents)} 个文档")
         return documents
     
+    @timed("vector.enhanced")
     def vector_search_enhanced(self, query: str, top_k: int = 5) -> List[Document]:
         """
         增强的向量检索：结合图信息
@@ -542,6 +554,7 @@ class HybridRetrievalModule:
             logger.error(f"获取邻居节点失败: {e}")
             return []
     
+    @timed("hybrid.total")
     def hybrid_search(self, query: str, top_k: int = 5) -> List[Document]:
         """
         混合检索：并行执行多种检索策略
@@ -574,8 +587,8 @@ class HybridRetrievalModule:
 
         # 使用线程池并行执行
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            future_dual = executor.submit(dual_search)
-            future_vector = executor.submit(vector_search)
+            future_dual = submit_context(executor, dual_search)
+            future_vector = submit_context(executor, vector_search)
 
             # 等待检索完成
             concurrent.futures.wait([future_dual, future_vector], timeout=20)
@@ -590,7 +603,7 @@ class HybridRetrievalModule:
             # 先添加双层检索结果
             if i < len(dual_docs):
                 doc = dual_docs[i]
-                doc_id = doc.metadata.get("node_id", hash(doc.page_content))
+                doc_id = content_key(doc)
                 if doc_id not in seen_doc_ids:
                     seen_doc_ids.add(doc_id)
                     doc.metadata["search_method"] = "dual_level"
@@ -602,7 +615,7 @@ class HybridRetrievalModule:
             # 再添加向量检索结果
             if i < len(vector_docs):
                 doc = vector_docs[i]
-                doc_id = doc.metadata.get("node_id", hash(doc.page_content))
+                doc_id = content_key(doc)
                 if doc_id not in seen_doc_ids:
                     seen_doc_ids.add(doc_id)
                     doc.metadata["search_method"] = "vector_enhanced"

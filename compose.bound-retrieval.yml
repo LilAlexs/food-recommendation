@@ -1,0 +1,4 @@
+services:
+  backend:
+    environment:
+      RAG_BOUND_RETRIEVAL: ${RAG_BOUND_RETRIEVAL:-1}

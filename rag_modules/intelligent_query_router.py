@@ -1,3 +1,7 @@
+from rag_modules.context_evidence import content_key
+from rag_modules.query_preparation import simple_query, enabled
+from rag_modules.performance_monitor import event
+from rag_modules.performance_monitor import timed, llm_create, submit_context
 """
 智能查询路由器
 根据查询特点自动选择最适合的检索策略：
@@ -61,10 +65,17 @@ class IntelligentQueryRouter:
             "total_queries": 0
         }
         
+    @timed("route.analysis")
     def analyze_query(self, query: str) -> QueryAnalysis:
         """
         深度分析查询特征，决定最佳检索策略
         """
+        plan = simple_query(query) if enabled("RAG_FAST_SIMPLE_QUERY") else None
+        if plan:
+            event(kind="analysis_decision", stage="route", source="rule", intent=plan.intent)
+            return QueryAnalysis(0.1, 0.0, False, 1, SearchStrategy.HYBRID_TRADITIONAL,
+                                 0.99, "明确单菜做法/用料查询，本地规则路由")
+        event(kind="analysis_decision", stage="route", source="llm")
         logger.info(f"分析查询特征: {query}")
         
         # 使用LLM进行智能分析
@@ -112,7 +123,7 @@ class IntelligentQueryRouter:
         """
         
         try:
-            response = self.llm_client.chat.completions.create(
+            response = llm_create(self.llm_client.chat.completions.create,
                 model=self.config.llm_model,
                 messages=[{"role": "user", "content": analysis_prompt}],
                 temperature=0.1,
@@ -163,6 +174,7 @@ class IntelligentQueryRouter:
             reasoning="基于规则的简单分析"
         )
     
+    @timed("route.total")
     def route_query(self, query: str, top_k: int = 5) -> Tuple[List[Document], QueryAnalysis]:
         """
         智能路由查询到最适合的检索引擎
@@ -238,8 +250,8 @@ class IntelligentQueryRouter:
 
         # 使用线程池并行执行
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            future_traditional = executor.submit(traditional_search)
-            future_graph = executor.submit(graph_search)
+            future_traditional = submit_context(executor, traditional_search)
+            future_graph = submit_context(executor, graph_search)
 
             # 等待两个检索完成
             concurrent.futures.wait([future_traditional, future_graph], timeout=30)
@@ -254,7 +266,7 @@ class IntelligentQueryRouter:
             # 先添加图RAG结果（通常质量更高）
             if i < len(graph_docs):
                 doc = graph_docs[i]
-                content_hash = hash(doc.page_content[:100])
+                content_hash = content_key(doc)
                 if content_hash not in seen_contents:
                     seen_contents.add(content_hash)
                     doc.metadata["search_source"] = "graph_rag"
@@ -263,7 +275,7 @@ class IntelligentQueryRouter:
             # 再添加传统检索结果
             if i < len(traditional_docs):
                 doc = traditional_docs[i]
-                content_hash = hash(doc.page_content[:100])
+                content_hash = content_key(doc)
                 if content_hash not in seen_contents:
                     seen_contents.add(content_hash)
                     doc.metadata["search_source"] = "traditional"

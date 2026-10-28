@@ -1,0 +1,15 @@
+{"id": "independent-01", "category": "independent", "message": "红烧肉怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "independent-02", "category": "independent", "message": "番茄炒蛋需要哪些材料？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "independent-03", "category": "independent", "message": "宫保鸡丁怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "independent-04", "category": "independent", "message": "清蒸鱼怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "independent-05", "category": "independent", "message": "麻婆豆腐怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "context-01", "category": "followup", "message": "它需要炖多久？", "history": ["红烧肉怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "context-02", "category": "ellipsis", "message": "两个人呢？", "history": ["红烧肉怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "context-03", "category": "added_constraint", "message": "不要放辣椒", "history": ["麻婆豆腐怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "context-04", "category": "topic_switch", "message": "麻婆豆腐怎么做？", "history": ["今天晚餐吃什么？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "context-05", "category": "topic_switch", "message": "红烧鱼怎么做？", "history": ["今天晚餐吃什么？", "麻婆豆腐怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "context-06", "category": "ambiguous", "message": "它怎么做？", "history": ["推荐两道适合晚餐的菜"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "context-07", "category": "constraint_carry", "message": "宫保鸡丁怎么做？", "history": ["我花生过敏，不吃辣，推荐一道菜"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "context-08", "category": "constraint_reset", "message": "取消之前的忌口限制，红烧肉怎么做？", "history": ["我花生过敏，不吃辣，推荐一道菜"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "context-09", "category": "relationship", "message": "红烧肉和回锅肉的食材有什么区别？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+{"id": "context-10", "category": "simple_ingredients", "message": "番茄炒蛋需要哪些材料？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}

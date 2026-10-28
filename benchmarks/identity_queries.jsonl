@@ -1,0 +1,9 @@
+{"id": "identity-01", "category": "exact", "message": "宫保鸡丁怎么做？", "history": [], "expected_recipe_status": "exact", "relevant_recipe_ids": null, "label_status": "identity_status_reviewed_answer_quality_pending"}
+{"id": "identity-02", "category": "exact", "message": "麻婆豆腐怎么做？", "history": [], "expected_recipe_status": "exact", "relevant_recipe_ids": null, "label_status": "identity_status_reviewed_answer_quality_pending"}
+{"id": "identity-03", "category": "alias", "message": "番茄炒蛋需要哪些材料？", "history": [], "expected_recipe_status": "alias", "relevant_recipe_ids": null, "label_status": "identity_status_reviewed_answer_quality_pending"}
+{"id": "identity-04", "category": "ambiguous", "message": "清蒸鱼怎么做？", "history": [], "expected_recipe_status": "needs_confirmation", "relevant_recipe_ids": null, "label_status": "identity_status_reviewed_answer_quality_pending"}
+{"id": "identity-05", "category": "variant", "message": "红烧肉怎么做？", "history": [], "expected_recipe_status": "needs_confirmation", "relevant_recipe_ids": null, "label_status": "identity_status_reviewed_answer_quality_pending"}
+{"id": "identity-06", "category": "missing", "message": "火星麻婆豆腐怎么做？", "history": [], "expected_recipe_status": "not_found", "relevant_recipe_ids": null, "label_status": "identity_status_reviewed_answer_quality_pending"}
+{"id": "identity-07", "category": "typo", "message": "宫爆鸡丁怎么做？", "history": [], "expected_recipe_status": "not_found", "relevant_recipe_ids": null, "label_status": "identity_status_reviewed_answer_quality_pending"}
+{"id": "identity-08", "category": "choice", "message": "查看菜谱：清蒸鲈鱼", "history": [], "expected_recipe_status": "exact", "relevant_recipe_ids": null, "label_status": "identity_status_reviewed_answer_quality_pending"}
+{"id": "identity-09", "category": "multiple", "message": "宫保鸡丁和麻婆豆腐怎么做？", "history": [], "expected_recipe_status": "needs_confirmation", "relevant_recipe_ids": null, "label_status": "identity_status_reviewed_answer_quality_pending"}

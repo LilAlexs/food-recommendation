@@ -1,0 +1,961 @@
+--- /dev/null
++++ b/rag_modules/performance_monitor.py
+@@ -0,0 +1,171 @@
++"""Opt-in JSONL tracing. No queries, answers, credentials, or exception messages."""
++import contextvars
++import functools
++import inspect
++import json
++import logging
++import os
++import threading
++import time
++import uuid
++from contextlib import contextmanager
++
++_current = contextvars.ContextVar("rag_trace", default=None)
++_stage = contextvars.ContextVar("rag_stage", default="unknown")
++_lock = threading.Lock()
++
++
++def submit_context(executor, fn, *args, **kwargs):
++    # A fresh context per submission; Context cannot be entered concurrently.
++    return executor.submit(contextvars.copy_context().run, fn, *args, **kwargs)
++
++
++def event(**fields):
++    trace = _current.get()
++    if trace is not None:
++        with trace["lock"]:
++            trace["events"].append(fields)
++
++
++def mark_failure(kind):
++    event(kind="failure", error_type=kind)
++
++
++@contextmanager
++def span(name):
++    start = time.perf_counter()
++    token = _stage.set(name)
++    error = None
++    try:
++        yield
++    except BaseException as exc:
++        error = type(exc).__name__
++        raise
++    finally:
++        event(kind="span", name=name, duration_ms=(time.perf_counter()-start)*1000,
++              error_type=error)
++        _stage.reset(token)
++
++
++def timed(name):
++    def decorate(fn):
++        if inspect.isgeneratorfunction(fn):
++            @functools.wraps(fn)
++            def stream(*args, **kwargs):
++                with span(name):
++                    yield from fn(*args, **kwargs)
++            return stream
++        @functools.wraps(fn)
++        def wrapped(*args, **kwargs):
++            with span(name):
++                result = fn(*args, **kwargs)
++                if name == "cache.lookup":
++                    event(kind="cache", hit=bool(result))
++                if name == "route.total":
++                    docs, analysis = result
++                    event(kind="retrieval", strategy=analysis.recommended_strategy.value,
++                          recipe_ids=[str(d.metadata["recipe_id"]) for d in docs
++                                      if d.metadata.get("recipe_id") is not None],
++                          document_count=len(docs),
++                          candidates=[{k: d.metadata.get(k) for k in
++                                       ("recipe_id", "recipe_name", "node_id")} for d in docs])
++                return result
++        return wrapped
++    return decorate
++
++
++def _usage(response):
++    usage = getattr(response, "usage", None)
++    return {k: getattr(usage, k, None) for k in
++            ("prompt_tokens", "completion_tokens", "total_tokens")}
++
++
++def llm_create(create, **kwargs):
++    """One SDK invocation; SDK internal retries are included in its latency.
++    Streaming usage is unknown unless the provider emits it. Never estimate zero.
++    """
++    start = time.perf_counter()
++    name = _stage.get()
++    def record(response=None, error=None):
++        event(kind="llm", name=name, model=kwargs.get("model"),
++              duration_ms=(time.perf_counter()-start)*1000,
++              error_type=type(error).__name__ if error else None,
++              timeout=bool(error and "timeout" in type(error).__name__.lower()),
++              **_usage(response))
++    try:
++        response = create(**kwargs)
++    except BaseException as exc:
++        record(error=exc)
++        raise
++    if not kwargs.get("stream"):
++        record(response)
++        return response
++    def chunks():
++        last_usage = None
++        error = None
++        try:
++            for chunk in response:
++                if getattr(chunk, "usage", None) is not None:
++                    last_usage = chunk
++                yield chunk
++        except BaseException as exc:
++            error = exc
++            raise
++        finally:
++            record(last_usage, error)
++            close = getattr(response, "close", None)
++            if close:
++                close()
++    return chunks()
++
++
++@contextmanager
++def request_trace(endpoint):
++    if not os.getenv("RAG_TRACE_PATH") or _current.get() is not None:
++        yield _current.get()
++        return
++    trace = {"trace_id": uuid.uuid4().hex, "endpoint": endpoint,
++             "started_at_unix": time.time(), "events": [], "lock": threading.Lock()}
++    token = _current.set(trace)
++    start = time.perf_counter()
++    try:
++        yield trace
++    except BaseException as exc:
++        mark_failure(type(exc).__name__)
++        raise
++    finally:
++        trace["duration_ms"] = (time.perf_counter()-start)*1000
++        trace.pop("lock")
++        trace["failed"] = any(e.get("kind") == "failure" for e in trace["events"])
++        try:
++            path = os.environ["RAG_TRACE_PATH"]
++            os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
++            with _lock, open(path, "a", encoding="utf-8") as out:
++                out.write(json.dumps(trace, ensure_ascii=False)+"\n")
++        except Exception:
++            logging.getLogger(__name__).exception("Unable to write performance trace")
++        finally:
++            _current.reset(token)
++
++
++def traced(endpoint):
++    def decorate(fn):
++        if inspect.isgeneratorfunction(fn):
++            @functools.wraps(fn)
++            def stream(*args, **kwargs):
++                with request_trace(endpoint):
++                    yield from fn(*args, **kwargs)
++            return stream
++        @functools.wraps(fn)
++        def wrapped(*args, **kwargs):
++            with request_trace(endpoint) as trace:
++                result = fn(*args, **kwargs)
++                response = result[0] if isinstance(result, tuple) else result
++                status = result[1] if isinstance(result, tuple) else getattr(response, "status_code", 200)
++                if status >= 400:
++                    mark_failure("HTTP"+str(status))
++                if trace is not None and hasattr(response, "headers"):
++                    response.headers["X-Trace-ID"] = trace["trace_id"]
++                return result
++        return wrapped
++    return decorate
+--- a/rag_modules/intelligent_query_router.py
++++ b/rag_modules/intelligent_query_router.py
+@@ -1,3 +1,4 @@
++from rag_modules.performance_monitor import timed, llm_create, submit_context
+ """
+ 智能查询路由器
+ 根据查询特点自动选择最适合的检索策略：
+@@ -61,6 +62,7 @@
+             "total_queries": 0
+         }
+         
++    @timed("route.analysis")
+     def analyze_query(self, query: str) -> QueryAnalysis:
+         """
+         深度分析查询特征，决定最佳检索策略
+@@ -112,7 +114,7 @@
+         """
+         
+         try:
+-            response = self.llm_client.chat.completions.create(
++            response = llm_create(self.llm_client.chat.completions.create,
+                 model=self.config.llm_model,
+                 messages=[{"role": "user", "content": analysis_prompt}],
+                 temperature=0.1,
+@@ -163,6 +165,7 @@
+             reasoning="基于规则的简单分析"
+         )
+     
++    @timed("route.total")
+     def route_query(self, query: str, top_k: int = 5) -> Tuple[List[Document], QueryAnalysis]:
+         """
+         智能路由查询到最适合的检索引擎
+@@ -238,8 +241,8 @@
+ 
+         # 使用线程池并行执行
+         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+-            future_traditional = executor.submit(traditional_search)
+-            future_graph = executor.submit(graph_search)
++            future_traditional = submit_context(executor, traditional_search)
++            future_graph = submit_context(executor, graph_search)
+ 
+             # 等待两个检索完成
+             concurrent.futures.wait([future_traditional, future_graph], timeout=30)
+--- a/rag_modules/hybrid_retrieval.py
++++ b/rag_modules/hybrid_retrieval.py
+@@ -1,3 +1,4 @@
++from rag_modules.performance_monitor import timed, llm_create, submit_context
+ """
+ 混合检索模块
+ 基于双层检索范式：实体级 + 主题级检索
+@@ -123,6 +124,7 @@
+             
+         return relationships
+             
++    @timed("hybrid.keywords")
+     def extract_query_keywords(self, query: str) -> Tuple[List[str], List[str]]:
+         """
+         提取查询关键词：实体级 + 主题级
+@@ -162,7 +164,7 @@
+         """
+         
+         try:
+-            response = self.llm_client.chat.completions.create(
++            response = llm_create(self.llm_client.chat.completions.create,
+                 model=self.config.llm_model,
+                 messages=[{"role": "user", "content": prompt}],
+                 temperature=0.1,
+@@ -430,6 +432,7 @@
+             
+         return results
+         
++    @timed("hybrid.dual")
+     def dual_level_retrieval(self, query: str, top_k: int = 5) -> List[Document]:
+         """
+         双层检索：结合实体级和主题级检索
+@@ -478,6 +481,7 @@
+         logger.info(f"双层检索完成，返回 {len(documents)} 个文档")
+         return documents
+     
++    @timed("vector.enhanced")
+     def vector_search_enhanced(self, query: str, top_k: int = 5) -> List[Document]:
+         """
+         增强的向量检索：结合图信息
+@@ -542,6 +546,7 @@
+             logger.error(f"获取邻居节点失败: {e}")
+             return []
+     
++    @timed("hybrid.total")
+     def hybrid_search(self, query: str, top_k: int = 5) -> List[Document]:
+         """
+         混合检索：并行执行多种检索策略
+@@ -574,8 +579,8 @@
+ 
+         # 使用线程池并行执行
+         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+-            future_dual = executor.submit(dual_search)
+-            future_vector = executor.submit(vector_search)
++            future_dual = submit_context(executor, dual_search)
++            future_vector = submit_context(executor, vector_search)
+ 
+             # 等待检索完成
+             concurrent.futures.wait([future_dual, future_vector], timeout=20)
+--- a/rag_modules/graph_rag_retrieval.py
++++ b/rag_modules/graph_rag_retrieval.py
+@@ -1,3 +1,4 @@
++from rag_modules.performance_monitor import timed, llm_create, submit_context
+ """
+ 真正的图RAG检索模块
+ 基于图结构的知识推理和检索，而非简单的关键词匹配
+@@ -138,6 +139,7 @@
+         except Exception as e:
+             logger.error(f"构建图索引失败: {e}")
+     
++    @timed("graph.understand")
+     def understand_graph_query(self, query: str) -> GraphQuery:
+         """
+         理解查询的图结构意图
+@@ -177,7 +179,7 @@
+         """
+         
+         try:
+-            response = self.llm_client.chat.completions.create(
++            response = llm_create(self.llm_client.chat.completions.create,
+                 model=self.config.llm_model,
+                 messages=[{"role": "user", "content": prompt}],
+                 temperature=0.1,
+@@ -204,6 +206,7 @@
+                 max_depth=2
+             )
+     
++    @timed("graph.traversal")
+     def multi_hop_traversal(self, graph_query: GraphQuery) -> List[GraphPath]:
+         """
+         多跳图遍历：这是图RAG的核心优势
+@@ -280,6 +283,7 @@
+         logger.info(f"多跳遍历完成，找到 {len(paths)} 条路径")
+         return paths
+     
++    @timed("graph.subgraph")
+     def extract_knowledge_subgraph(self, graph_query: GraphQuery) -> KnowledgeSubgraph:
+         """
+         提取知识子图：获取实体相关的完整知识网络
+@@ -412,6 +416,7 @@
+             
+         return query_plans
+     
++    @timed("graph.total")
+     def graph_rag_search(self, query: str, top_k: int = 5) -> List[Document]:
+         """
+         图RAG主搜索接口：整合所有图RAG能力
+--- a/rag_modules/generation_integration.py
++++ b/rag_modules/generation_integration.py
+@@ -1,3 +1,4 @@
++from rag_modules.performance_monitor import timed, llm_create, submit_context
+ """
+ 生成集成模块
+ """
+@@ -57,6 +58,7 @@
+         回答：
+         """
+ 
++    @timed("generation")
+     def generate_adaptive_answer(self, question: str, documents: List[Document]) -> str:
+         """
+         智能统一答案生成
+@@ -81,7 +83,7 @@
+         prompt = self._build_prompt(question, context)
+         
+         try:
+-            response = self.client.chat.completions.create(
++            response = llm_create(self.client.chat.completions.create,
+                 model=self.model_name,
+                 messages=[
+                     {"role": "user", "content": prompt}
+@@ -96,6 +98,7 @@
+             logger.error(f"LightRAG答案生成失败: {e}")
+             return f"抱歉，生成回答时出现错误：{str(e)}"
+     
++    @timed("generation.stream")
+     def generate_adaptive_answer_stream(self, question: str, documents: List[Document], max_retries: int = 3):
+         """
+         LightRAG风格的流式答案生成（带重试机制）
+@@ -119,7 +122,7 @@
+         
+         for attempt in range(max_retries):
+             try:
+-                response = self.client.chat.completions.create(
++                response = llm_create(self.client.chat.completions.create,
+                     model=self.model_name,
+                     messages=[
+                         {"role": "user", "content": prompt}
+@@ -137,7 +140,7 @@
+                 
+                 full_response = ""
+                 for chunk in response:
+-                    if chunk.choices[0].delta.content:
++                    if chunk.choices and chunk.choices[0].delta.content:
+                         content = chunk.choices[0].delta.content
+                         full_response += content
+                         yield content  # 使用yield返回流式内容
+--- a/rag_modules/session_cache_manager.py
++++ b/rag_modules/session_cache_manager.py
+@@ -1,3 +1,4 @@
++from rag_modules.performance_monitor import timed, llm_create, submit_context
+ """
+ 会话缓存管理模块
+ 负责管理会话级语义缓存和上下文
+@@ -45,6 +46,7 @@
+         except:
+             return 0.0
+ 
++    @timed("cache.lookup")
+     def check_semantic_cache(self, query: str, session_id: str = None) -> Optional[str]:
+         """检查会话级语义缓存中是否有相似查询"""
+         if not session_id or session_id not in self.session_caches:
+@@ -145,6 +147,7 @@
+         except Exception as e:
+             logger.warning(f"添加上下文失败: {e}")
+ 
++    @timed("query.context")
+     def get_context_for_query(self, session_id: str, current_query: str) -> str:
+         """获取增强的查询上下文"""
+         try:
+--- a/rag_modules/milvus_index_construction.py
++++ b/rag_modules/milvus_index_construction.py
+@@ -1,3 +1,4 @@
++from rag_modules.performance_monitor import timed, llm_create, submit_context
+ """
+ Milvus索引构建模块
+ """
+@@ -322,6 +323,7 @@
+             logger.error(f"添加新文档失败: {e}")
+             return False
+     
++    @timed("vector.search")
+     def similarity_search(self, query: str, k: int = 5, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+         """
+         相似度搜索
+--- a/rag_modules/web_service_handler.py
++++ b/rag_modules/web_service_handler.py
+@@ -1,3 +1,4 @@
++from rag_modules.performance_monitor import traced, submit_context, mark_failure
+ """
+ Web服务处理模块
+ 负责处理Web API和静态文件服务
+@@ -116,6 +117,7 @@
+             # 如果文件不存在，返回index.html（用于SPA路由）
+             return send_from_directory(frontend_path, 'index.html')
+     
++    @traced("chat")
+     def _handle_chat_request(self):
+         """处理普通聊天请求"""
+         from flask import request, jsonify
+@@ -142,8 +144,8 @@
+             
+             # 并行执行缓存检查和查询预处理
+             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+-                future_cache = executor.submit(check_cache)
+-                future_query = executor.submit(prepare_query)
++                future_cache = submit_context(executor, check_cache)
++                future_query = submit_context(executor, prepare_query)
+                 
+                 # 等待缓存检查完成
+                 concurrent.futures.wait([future_cache], timeout=1)
+@@ -187,7 +189,7 @@
+     
+     def _handle_stream_request(self):
+         """处理流式聊天请求"""
+-        from flask import request, Response
++        from flask import request, Response, jsonify
+         
+         try:
+             data = request.get_json()
+@@ -197,6 +199,7 @@
+             if not query:
+                 return jsonify({"error": "消息不能为空"}), 400
+             
++            @traced("chat.stream")
+             def generate():
+                 try:
+                     # 🚀 并行执行缓存检查和预处理
+@@ -213,8 +216,8 @@
+                     
+                     # 并行执行缓存检查和查询预处理
+                     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+-                        future_cache = executor.submit(check_cache)
+-                        future_query = executor.submit(prepare_query)
++                        future_cache = submit_context(executor, check_cache)
++                        future_query = submit_context(executor, prepare_query)
+                         
+                         # 等待缓存检查完成
+                         concurrent.futures.wait([future_cache], timeout=1)
+@@ -256,6 +259,7 @@
+                     yield f"data: [DONE]\n\n"
+                 
+                 except Exception as e:
++                    mark_failure(type(e).__name__)
+                     logger.error(f"Stream API错误: {e}")
+                     error_msg = f"抱歉，处理您的问题时出现错误：{str(e)}"
+                     data_obj = {"chunk": error_msg}
+--- /dev/null
++++ b/tests/test_phase1.py
+@@ -0,0 +1,132 @@
++"""Dependency-free monitoring tests; fake providers are NOT a performance baseline."""
++import concurrent.futures
++import importlib.util
++import json
++import os
++from pathlib import Path
++import sys
++import tempfile
++import types
++import unittest
++
++ROOT = Path(__file__).resolve().parents[1]
++# Load only the inspected modules: production package __init__ eagerly imports GPU/DB dependencies.
++pkg = types.ModuleType('rag_modules');pkg.__path__=[str(ROOT/'rag_modules')]
++sys.modules['rag_modules']=pkg
++from rag_modules import performance_monitor as m
++
++
++class MonitorTests(unittest.TestCase):
++    def setUp(self):
++        self.tmp=tempfile.TemporaryDirectory()
++        self.path=Path(self.tmp.name)/'traces.jsonl'
++        self.old=os.environ.get('RAG_TRACE_PATH')
++        os.environ['RAG_TRACE_PATH']=str(self.path)
++
++    def tearDown(self):
++        if self.old is None: os.environ.pop('RAG_TRACE_PATH',None)
++        else: os.environ['RAG_TRACE_PATH']=self.old
++        self.tmp.cleanup()
++
++    def read(self):
++        return [json.loads(s) for s in self.path.read_text().splitlines()]
++
++    def test_parallel_context_and_request_isolation(self):
++        def worker():
++            with m.request_trace('test'):
++                with concurrent.futures.ThreadPoolExecutor(2) as pool:
++                    futures=[m.submit_context(pool,m.llm_create,lambda **kw: types.SimpleNamespace(usage=None),model='fake') for _ in range(4)]
++                    for f in futures:f.result()
++        with concurrent.futures.ThreadPoolExecutor(3) as pool:
++            list(pool.map(lambda _: worker(),range(3)))
++        rows=self.read()
++        self.assertEqual(len({r['trace_id'] for r in rows}),3)
++        self.assertEqual([len(r['events']) for r in rows],[4]*3)
++        self.assertIsNone(m._current.get())
++
++    def test_tokens_and_timeout(self):
++        usage=types.SimpleNamespace(prompt_tokens=3,completion_tokens=4,total_tokens=7)
++        def fail(**kw): raise TimeoutError('secret query must not be logged')
++        with m.request_trace('test'):
++            m.llm_create(lambda **kw: types.SimpleNamespace(usage=usage),model='fake')
++            with self.assertRaises(TimeoutError):m.llm_create(fail,model='fake')
++        calls=self.read()[0]['events']
++        self.assertEqual(calls[0]['total_tokens'],7)
++        self.assertTrue(calls[1]['timeout'])
++        self.assertNotIn('secret query',self.path.read_text())
++
++    def test_stream_usage_only_chunk_and_close(self):
++        class Stream:
++            closed=False
++            def __iter__(self):
++                yield types.SimpleNamespace(usage=None,choices=['x'])
++                yield types.SimpleNamespace(usage=types.SimpleNamespace(total_tokens=9),choices=[])
++            def close(self):self.closed=True
++        stream=Stream()
++        with m.request_trace('stream'):
++            self.assertEqual(len(list(m.llm_create(lambda **kw:stream,stream=True))),2)
++        self.assertTrue(stream.closed)
++        self.assertEqual(self.read()[0]['events'][0]['total_tokens'],9)
++
++    def test_stream_iteration_failure(self):
++        def stream():
++            yield 1
++            raise TimeoutError()
++        with m.request_trace('stream'):
++            with self.assertRaises(TimeoutError):list(m.llm_create(lambda **kw:stream(),stream=True))
++        self.assertTrue(self.read()[0]['events'][0]['timeout'])
++
++    def test_generator_trace_covers_consumption_and_disconnect(self):
++        @m.traced('sse')
++        def stream():
++            yield 1
++            yield 2
++        gen=stream();self.assertFalse(self.path.exists())
++        self.assertEqual(next(gen),1);gen.close()
++        self.assertTrue(self.read()[0]['failed'])
++        self.assertIsNone(m._current.get())
++
++    def test_disabled_monitoring_preserves_result(self):
++        os.environ.pop('RAG_TRACE_PATH')
++        @m.traced('test')
++        @m.timed('stage')
++        def f():return 42
++        self.assertEqual(f(),42)
++        self.assertFalse(self.path.exists())
++
++    def test_swallowed_http_error(self):
++        @m.traced('chat')
++        def f(): return types.SimpleNamespace(headers={}),500
++        f();self.assertTrue(self.read()[0]['failed'])
++
++    def test_real_router_all_three_branches(self):
++        documents=types.ModuleType('langchain_core.documents')
++        documents.Document=object
++        core=types.ModuleType('langchain_core');core.documents=documents
++        sys.modules['langchain_core']=core;sys.modules['langchain_core.documents']=documents
++        from rag_modules.intelligent_query_router import IntelligentQueryRouter
++        for strategy in ['hybrid_traditional','graph_rag','combined']:
++            def create(**kw):
++                return types.SimpleNamespace(choices=[types.SimpleNamespace(message=types.SimpleNamespace(content=json.dumps({'recommended_strategy':strategy})))],usage=None)
++            client=types.SimpleNamespace(chat=types.SimpleNamespace(completions=types.SimpleNamespace(create=create)))
++            class Retrieval:
++                @m.timed('fake.retrieval')
++                def hybrid_search(self,*args):
++                    m.llm_create(lambda **kw: types.SimpleNamespace(usage=None),model='fake')
++                    return [types.SimpleNamespace(page_content='one',metadata={'recipe_id':'r1'})]
++                graph_rag_search=hybrid_search
++            router=IntelligentQueryRouter(Retrieval(),Retrieval(),client,types.SimpleNamespace(llm_model='fake'))
++            with m.request_trace(strategy):
++                docs,analysis=router.route_query('test',5)
++                self.assertTrue(docs)
++            trace=self.read()[-1]
++            self.assertEqual(sum(e['kind']=='llm' for e in trace['events']),3 if strategy=='combined' else 2)
++            self.assertTrue(any(e['kind']=='retrieval' for e in trace['events']))
++
++    def test_dataset_structure(self):
++        rows=[json.loads(s) for s in (ROOT/'benchmarks/queries.jsonl').read_text().splitlines()]
++        self.assertEqual(len(rows),50);self.assertEqual(len({r['id'] for r in rows}),50)
++        self.assertEqual({c:sum(r['category']==c for r in rows) for c in {r['category'] for r in rows}},dict.fromkeys(['independent','followup','relationship','constraints','switch'],10))
++        self.assertTrue(all(r['relevant_recipe_ids'] is None for r in rows))
++
++if __name__=='__main__':unittest.main()
+--- /dev/null
++++ b/tests/test_baseline_runner.py
+@@ -0,0 +1,50 @@
++import csv
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++import json
++from pathlib import Path
++import subprocess
++import sys
++import tempfile
++import threading
++import unittest
++import uuid
++
++ROOT=Path(__file__).resolve().parents[1]
++
++class RunnerTests(unittest.TestCase):
++    def test_http_runner_full_50_case_fixture(self):
++        # HTTP fixture validates runner I/O only; its timing must not enter real baselines.
++        with tempfile.TemporaryDirectory() as directory:
++            directory=Path(directory);trace=directory/'trace.jsonl'
++            class Handler(BaseHTTPRequestHandler):
++                def log_message(self,*args):pass
++                def do_GET(self):
++                    self.send_response(200);self.end_headers();self.wfile.write(b'{}')
++                def do_POST(self):
++                    data=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
++                    tid=uuid.uuid4().hex
++                    with trace.open('a') as out:
++                        out.write(json.dumps(dict(trace_id=tid,failed=False,events=[dict(kind='llm',name='generation',error_type=None,timeout=False,total_tokens=None)]))+'\n')
++                    self.send_response(200);self.send_header('X-Trace-ID',tid);self.end_headers()
++                    self.wfile.write(json.dumps({'response':'fixture','from_cache':False}).encode())
++            server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
++            thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
++            try:
++                result=subprocess.run([sys.executable,str(ROOT/'benchmarks/run_baseline.py'),
++                    '--base-url',f'http://127.0.0.1:{server.server_port}',
++                    '--model','FAKE_FIXTURE','--top-k','5','--cache-state','uncontrolled',
++                    '--trace',str(trace),'--output',str(directory/'output')],capture_output=True,text=True)
++                self.assertEqual(result.returncode,0,result.stderr)
++                summary=json.loads((directory/'output/manifest.json').read_text())['summary']['all']
++                self.assertEqual(summary['requests'],50)
++                self.assertEqual(summary['successes'],50)
++                self.assertEqual(summary['trace_coverage'],1)
++                self.assertEqual(summary['llm_calls'],50)
++                with (directory/'output/baseline.csv').open() as f:rows=list(csv.DictReader(f))
++                self.assertEqual(len(rows),50)
++                self.assertTrue(all(r['total_tokens']=='' for r in rows))
++                self.assertEqual(len(trace.read_text().splitlines()),70) # 20 seed turns
++            finally:
++                server.shutdown();server.server_close();thread.join()
++
++if __name__=='__main__':unittest.main()
+--- /dev/null
++++ b/benchmarks/run_baseline.py
+@@ -0,0 +1,131 @@
++"""Stdlib HTTP runner. Fresh sessions are not equivalent to an empty global cache."""
++import argparse
++import csv
++import json
++import math
++import time
++import urllib.error
++import urllib.request
++import uuid
++from pathlib import Path
++
++
++def percentile(values, q):
++    values = sorted(values)
++    return values[max(0, math.ceil(len(values)*q)-1)] if values else None
++
++
++def post(base, message, session, timeout):
++    request = urllib.request.Request(base+'/api/chat', data=json.dumps(
++        {'message': message, 'session_id': session}).encode(),
++        headers={'Content-Type': 'application/json'})
++    start = time.perf_counter()
++    try:
++        with urllib.request.urlopen(request, timeout=timeout) as response:
++            data = json.load(response)
++            return dict(duration_ms=(time.perf_counter()-start)*1000,
++                        http_status=response.status, trace_id=response.headers.get('X-Trace-ID'),
++                        from_cache=data.get('from_cache', False),
++                        response=data.get('response'), error_type=None)
++    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
++        return dict(duration_ms=(time.perf_counter()-start)*1000,
++                    http_status=getattr(exc, 'code', None), trace_id=None,
++                    from_cache=None, response=None, error_type=type(exc).__name__)
++
++
++def main():
++    p = argparse.ArgumentParser()
++    p.add_argument('--base-url', default='http://127.0.0.1:8000')
++    p.add_argument('--queries', type=Path, default=Path(__file__).with_name('queries.jsonl'))
++    p.add_argument('--output', type=Path, default=Path('benchmark_results'))
++    p.add_argument('--trace', type=Path, help='Server JSONL trace path; same filesystem or copied after run')
++    p.add_argument('--repeat', type=int, default=1)
++    p.add_argument('--timeout', type=float, default=180)
++    p.add_argument('--cache-state', required=True, choices=['cold','warm','uncontrolled'])
++    p.add_argument('--model', required=True)
++    p.add_argument('--top-k', type=int, required=True)
++    args = p.parse_args()
++    if args.repeat < 1:
++        p.error('--repeat must be >= 1')
++    args.output.mkdir(parents=True, exist_ok=True)
++    manifest = dict(base_url=args.base_url, model=args.model, top_k=args.top_k,
++                    cache_state=args.cache_state, repeat=args.repeat, concurrency=1,
++                    started_at_unix=time.time(), dataset_sha256=__import__('hashlib').sha256(args.queries.read_bytes()).hexdigest(),
++                    note='Model/top_k/cache state are operator declarations. /health is shallow; initialization failures may occur later.')
++    try:
++        with urllib.request.urlopen(args.base_url+'/health', timeout=5) as response:
++            if response.status != 200:
++                raise ValueError('health status')
++    except Exception as exc:
++        manifest.update(status='blocked', error_type=type(exc).__name__)
++        (args.output/'manifest.json').write_text(json.dumps(manifest, indent=2))
++        print('BLOCKED: backend unavailable; no latency/quality baseline produced.')
++        return 2
++    cases = [json.loads(line) for line in args.queries.read_text().splitlines() if line.strip()]
++    rows = []
++    with (args.output/'responses.jsonl').open('w') as out:
++        for repeat in range(args.repeat):
++            for case in cases:
++                session = uuid.uuid4().hex
++                seed_failed = False
++                seed_trace_ids = []
++                for seed in case['history']:
++                    result = post(args.base_url, seed, session, args.timeout)
++                    seed_trace_ids.append(result['trace_id'])
++                    if result['error_type'] or not result['response']:
++                        seed_failed = True
++                result = post(args.base_url, case['message'], session, args.timeout)
++                row = dict(id=case['id'], category=case['category'], repeat=repeat,
++                           seed_failed=seed_failed, seed_trace_ids=seed_trace_ids, **result)
++                out.write(json.dumps(row, ensure_ascii=False)+'\n');out.flush()
++                rows.append(row)
++    traces = {}
++    if args.trace and args.trace.exists():
++        for line in args.trace.read_text().splitlines():
++            trace = json.loads(line); traces[trace['trace_id']] = trace
++    for row in rows:
++        trace = traces.get(row['trace_id'])
++        for seed_id in row['seed_trace_ids']:
++            seed_trace = traces.get(seed_id)
++            if seed_trace and (seed_trace['failed'] or any(
++                    e['kind']=='llm' and e['error_type'] for e in seed_trace['events'])):
++                row['seed_failed'] = True
++        row['trace_available'] = trace is not None
++        row['application_failed'] = trace['failed'] if trace else None
++        calls = [e for e in trace['events'] if e['kind']=='llm'] if trace else []
++        row['llm_calls'] = len(calls) if trace else None
++        row['llm_errors'] = sum(bool(e['error_type']) for e in calls) if trace else None
++        row['llm_timeouts'] = sum(bool(e['timeout']) for e in calls) if trace else None
++        row['tokens_known'] = bool(trace) and all(e['total_tokens'] is not None for e in calls)
++        row['total_tokens'] = sum(e['total_tokens'] for e in calls) if row['tokens_known'] else None
++        row['success'] = (row['http_status']==200 and bool(row['response'])
++                          and not row['seed_failed'] and not row['application_failed']
++                          and not row['llm_errors'])
++        # Exceptions may be swallowed by legacy modules; traces expose degraded requests.
++        for name in ['route.analysis','graph.total','vector.search','hybrid.total','generation']:
++            durations = [e['duration_ms'] for e in trace['events'] if e['kind']=='span' and e['name']==name] if trace else []
++            row[name+'_ms'] = sum(durations) if durations else None
++    fields = [k for k in rows[0] if k != 'response']
++    with (args.output/'baseline.csv').open('w') as out:
++        writer = csv.DictWriter(out, fieldnames=fields);writer.writeheader()
++        writer.writerows({k:r[k] for k in fields} for r in rows)
++    summary = {}
++    for category in ['all']+sorted({r['category'] for r in rows}):
++        group = [r for r in rows if category=='all' or r['category']==category]
++        valid = [r['duration_ms'] for r in group if r['success']]
++        summary[category] = dict(requests=len(group),successes=len(valid),
++            failure_rate=1-len(valid)/len(group),p50_success_ms=percentile(valid,.5),
++            p95_success_ms=percentile(valid,.95),
++            trace_coverage=sum(r['trace_available'] for r in group)/len(group),
++            llm_calls=sum(r['llm_calls'] or 0 for r in group) if all(r['trace_available'] for r in group) else None,
++            llm_errors=sum(r['llm_errors'] or 0 for r in group) if all(r['trace_available'] for r in group) else None,
++            llm_timeouts=sum(r['llm_timeouts'] or 0 for r in group) if all(r['trace_available'] for r in group) else None)
++    manifest.update(status='finished', finished_at_unix=time.time(),
++                    quality_status='pending labels and review; no retrieval/constraint scores claimed',
++                    latency_scope='HTTP client wall clock; seed turns excluded; includes cache hits', summary=summary)
++    (args.output/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
++    print(json.dumps(summary,ensure_ascii=False,indent=2))
++    return 0
++
++if __name__=='__main__':
++    raise SystemExit(main())
+--- /dev/null
++++ b/benchmarks/queries.jsonl
+@@ -0,0 +1,50 @@
++{"id": "independent-01", "category": "independent", "message": "红烧肉怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "independent-02", "category": "independent", "message": "番茄炒蛋需要哪些材料？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "independent-03", "category": "independent", "message": "宫保鸡丁怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "independent-04", "category": "independent", "message": "清蒸鱼怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "independent-05", "category": "independent", "message": "麻婆豆腐怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "independent-06", "category": "independent", "message": "葱油拌面怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "independent-07", "category": "independent", "message": "凉拌黄瓜怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "independent-08", "category": "independent", "message": "蛋炒饭怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "independent-09", "category": "independent", "message": "可乐鸡翅怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "independent-10", "category": "independent", "message": "土豆炖牛肉怎么做？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "followup-01", "category": "followup", "message": "它需要放多少盐？", "history": ["红烧肉怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "followup-02", "category": "followup", "message": "这道菜可以不放辣椒吗？", "history": ["红烧肉怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "followup-03", "category": "followup", "message": "需要炒多久？", "history": ["红烧肉怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "followup-04", "category": "followup", "message": "可以用鸡肉替代吗？", "history": ["红烧肉怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "followup-05", "category": "followup", "message": "还有其他做法吗？", "history": ["红烧肉怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "followup-06", "category": "followup", "message": "两个人吃需要多少材料？", "history": ["红烧肉怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "followup-07", "category": "followup", "message": "没有生抽怎么办？", "history": ["红烧肉怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "followup-08", "category": "followup", "message": "可以提前一天做好吗？", "history": ["红烧肉怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "followup-09", "category": "followup", "message": "能改成清淡口味吗？", "history": ["红烧肉怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "followup-10", "category": "followup", "message": "最后一步是什么？", "history": ["红烧肉怎么做？"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "relationship-01", "category": "relationship", "message": "鸡肉和土豆可以做哪些菜？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "relationship-02", "category": "relationship", "message": "哪些菜同时用到番茄和鸡蛋？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "relationship-03", "category": "relationship", "message": "红烧肉和回锅肉的食材有哪些共同点？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "relationship-04", "category": "relationship", "message": "牛肉适合和哪些蔬菜搭配？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "relationship-05", "category": "relationship", "message": "有哪些用到豆腐的川菜？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "relationship-06", "category": "relationship", "message": "哪些家常菜同时用到猪肉和青椒？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "relationship-07", "category": "relationship", "message": "鸡蛋可以和哪些蔬菜搭配？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "relationship-08", "category": "relationship", "message": "哪些菜需要先焯水再炒？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "relationship-09", "category": "relationship", "message": "葱油拌面与炸酱面的调料有什么区别？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "relationship-10", "category": "relationship", "message": "哪些菜同时用到土豆和牛肉？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "constraints-01", "category": "constraints", "message": "推荐不含花生的家常菜。", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "constraints-02", "category": "constraints", "message": "推荐20分钟内能做好的晚餐。", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "constraints-03", "category": "constraints", "message": "只有鸡蛋和番茄，可以做什么？", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "constraints-04", "category": "constraints", "message": "推荐不放辣椒的鸡肉菜。", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "constraints-05", "category": "constraints", "message": "推荐适合新手的素菜。", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "constraints-06", "category": "constraints", "message": "不要香菜，推荐一道凉菜。", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "constraints-07", "category": "constraints", "message": "推荐不含牛奶的早餐。", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "constraints-08", "category": "constraints", "message": "推荐两人份、30分钟内能做好的晚餐。", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "constraints-09", "category": "constraints", "message": "推荐不用烤箱的鸡翅做法。", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "constraints-10", "category": "constraints", "message": "推荐不放猪肉、口味清淡的菜。", "history": [], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "switch-01", "category": "switch", "message": "换个话题，蛋炒饭怎么做？", "history": ["推荐一道不含花生、两人份、20分钟内的鸡肉菜。"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "switch-02", "category": "switch", "message": "不做鸡肉了，想吃素面。", "history": ["推荐一道不含花生、两人份、20分钟内的鸡肉菜。"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "switch-03", "category": "switch", "message": "前面的忌口取消，推荐宫保鸡丁。", "history": ["推荐一道不含花生、两人份、20分钟内的鸡肉菜。"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "switch-04", "category": "switch", "message": "现在改成四个人吃，推荐晚餐。", "history": ["推荐一道不含花生、两人份、20分钟内的鸡肉菜。"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "switch-05", "category": "switch", "message": "不限制时间了，红烧肉怎么做？", "history": ["推荐一道不含花生、两人份、20分钟内的鸡肉菜。"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "switch-06", "category": "switch", "message": "别管刚才的菜，清蒸鱼怎么做？", "history": ["推荐一道不含花生、两人份、20分钟内的鸡肉菜。"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "switch-07", "category": "switch", "message": "现在聊早餐，推荐鸡蛋做法。", "history": ["推荐一道不含花生、两人份、20分钟内的鸡肉菜。"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "switch-08", "category": "switch", "message": "换成牛肉，推荐一道炖菜。", "history": ["推荐一道不含花生、两人份、20分钟内的鸡肉菜。"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "switch-09", "category": "switch", "message": "我想做甜点，有什么简单的做法？", "history": ["推荐一道不含花生、两人份、20分钟内的鸡肉菜。"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
++{"id": "switch-10", "category": "switch", "message": "不用之前的食材，凉拌黄瓜怎么做？", "history": ["推荐一道不含花生、两人份、20分钟内的鸡肉菜。"], "relevant_recipe_ids": null, "label_status": "pending_human_review"}
+--- /dev/null
++++ b/benchmarks/README.md
+@@ -0,0 +1,73 @@
++# 第一阶段：监控与性能基线
++
++当前状态：监控代码和评测工具已实现并离线验证；真实服务性能、检索质量基线仍未完成。旧监控补丁未在本次附件、工作目录或两轮文件搜索中找到，本次是基于上传源码的新补丁。
++
++## 运行
++
++在原有可正常运行的 Python 环境中，将补丁包中的 `rag_modules` 文件覆盖到项目同名目录。保留自己的 `.env`，补丁包不含任何密钥文件。
++
++启动后端前设置路径（单进程运行；Docker 内需挂载可写目录）：
++
++```powershell
++$env:RAG_TRACE_PATH = "$PWD\benchmark_results\trace.jsonl"
++python main.py
++```
++
++沿用项目现有方式构建/加载知识库并进入 Web 服务模式（8000 端口）。在另一终端运行：
++
++```powershell
++python benchmarks/run_baseline.py --base-url http://127.0.0.1:8000 --model YOUR_ACTUAL_MODEL --top-k 5 --cache-state uncontrolled --repeat 3 --trace benchmark_results/trace.jsonl --output benchmark_results/baseline_run1
++```
++
++`--model`、`--top-k` 和缓存状态是实验者声明，脚本不修改服务配置。务必与实际配置一致。每个场景建立独立 session；追问与话题切换先执行种子轮，种子轮不计入目标请求的耗时，仍记录在 trace 中。
++
++输出：`responses.jsonl` 保存目标轮的回答供人工审核；`baseline.csv` 保存每请求 HTTP 耗时、调用数、已知 Token、错误及阶段耗时；`manifest.json` 保存参数、数据集校验和、分组 P50/P95、失败率和 trace 覆盖率。健康检查失败时只输出 `status=blocked`，不会生成虚假的性能数字。原 `/health` 仅为浅层检查，不能保证数据库可用。
++
++同机单进程测试时使用 `--trace` 指向服务端日志；若服务运行在容器或另一台机器，需要让日志可在评测端读取。未提供 trace 时 LLM/Token 指标留空，HTTP 200 也可能包含应用降级文本，必须人工审核；不宜作为最终成功率。日志包含种子轮，可按响应 `X-Trace-ID` 关联目标轮。
++
++## 缓存与实验控制
++
++- 首轮建议填 `uncontrolled`。`cold`/`warm` 只记录声明，不会自动清缓存或预热。
++- 需要冷缓存时，在专用测试实例上调用现有 `cache_manager.clear_all_caches()` 或重启实例（并确认缓存初始化状态）；后续查询仍可能命中语义缓存，应在 CSV 中核对 `from_cache`。
++- 不要在追问前清会话历史。50 个场景、一次重复包含 50 个目标轮和 20 个种子轮，三次重复共 210 次 HTTP 调用；缓存可能减少实际 LLM 调用。
++- 固定数据快照、模型/供应商、温度、max_tokens、top_k、硬件、并发及缓存策略，重复运行。脚本为串行延迟评测，不是并发压测。
++- P50/P95 使用最近秩定义，只聚合判定成功的目标请求，包含缓存命中。应同时查看失败率、缓存命中和各类别结果；10 条一组的一轮 P95 样本量较小。
++
++## 监控含义与限制
++
++`RAG_TRACE_PATH` 未设置时不写 trace。线程池通过 `copy_context` 传播同一请求 ID，每个提交复制独立上下文。阶段耗时采用 `perf_counter`；并行阶段与嵌套阶段有重叠，不能相加作为端到端耗时。
++
++LLM 调用数指一次 SDK `create` 调用；SDK 内部自动重试不单独计数。流式调用从创建流计时至迭代结束，包含消费时间；供应商没返回 usage 时 Token 为未知值，不记为 0。本次不强行要求流式 `include_usage`，以免破坏供应商兼容性。服务自带重试会多次计数。超时以异常类名含 timeout 判断，分母可用 CSV 中 LLM 调用总数；不代表统一端到端超时控制。
++
++监控记录模型名、阶段、异常类型及候选标识，不记录提示词、回答和异常正文。原项目自己的业务日志不在此保证范围。trace 为追加文件，应自行轮转。当前只验证单进程；多进程请各用独立日志文件再汇总。
++
++`graph.total` 包含图查询理解，`hybrid.total` 包含关键词理解及检索，`vector.search` 是实际向量搜索，`generation` 是生成总耗时。图路径转 Document 时可能没有 recipe_id，trace 同时保留 recipe_name/node_id；本次不冒充已完成统一菜谱 ID 改造。
++
++HTTP 失败、种子轮失败及可观察到的 LLM 异常都会使目标请求不计为成功；旧检索器吞掉数据库异常后返回空列表的情况仍可能只表现为低质量回答，需结合候选数和人工审核。HTTP 超时后服务可能继续运行，缺失的 trace 不能按零调用处理。
++
++当前 runner 评测 `/api/chat`。SSE 监控覆盖迭代生命周期和中断，但尚无真实 SSE 端到端/首 Token 基线。非法流式请求返回 JSON 时不生成 SSE trace。
++
++## 质量评测待办
++
++50 条查询是起始场景集，不是已标注金标准。`relevant_recipe_ids=null` 表示尚未审核，不可解释为空相关集。需要结合实际图谱、菜谱 ID、数据快照补充相关菜谱/分级相关性、硬约束检查及多轮上下文判定。之后才能报告 Recall@5、MRR@10、NDCG@10、约束满足率和答案正确率。top_k=5 无法计算完整的 @10 指标，必须另开 top_k>=10 的固定配置实验。
++
++## 本次代码检查结论
++
++调用链：
++
++`WebServiceHandler → cache.lookup / query.context（并行）→ route.analysis（LLM）→ hybrid.total 或 graph.total 或两者并行 → generation（LLM）→ 写入缓存/上下文`
++
++正常、无缓存、无重试路径的静态预期：传统分支通常 3 次 LLM（路由、关键词、生成）；图分支通常 3 次（路由、图理解、生成）；组合分支通常 4 次。图数据库未连接、提前失败、回退、缓存命中、流式重试会改变次数，必须以 trace 实测为准。规则指代模块当前虽被导入，但 Web 路径未调用它。
++
++现有 `wait(timeout=...)` 后线程池退出仍会等待运行中的任务，不能把这些值当成真实请求超时。线程内部异常可能被 future 或检索器吞掉。流式重试可能在已输出部分文本后重新生成；本阶段记录问题，未改变检索/重试业务语义。
++
++额外修复两处直接阻碍监控的流式问题：Web 模块缺少 `jsonify` 导入；生成器不能处理 choices 为空的 usage-only chunk。
++
++离线检查：
++
++```bash
++python -m unittest discover -s tests -v
++python -m compileall -q rag_modules benchmarks tests
++```
++
++已通过 10 项测试，其中 HTTP fixture 完整验证 50 目标轮 + 20 种子轮、CSV/汇总和未知 Token 处理。fixture 与假 LLM 的耗时不属于 GraphRAG 性能基线。
+--- /dev/null
++++ b/benchmarks/results/environment_preflight/environment.json
+@@ -0,0 +1,15 @@
++{
++  "missing_dependencies": [
++    "flask",
++    "openai",
++    "neo4j",
++    "pymilvus",
++    "langchain_core",
++    "sentence_transformers"
++  ],
++  "localhost_ports": {
++    "8000": "unavailable",
++    "7687": "unavailable",
++    "19530": "unavailable"
++  }
++}
+\ No newline at end of file
+--- /dev/null
++++ b/benchmarks/results/environment_preflight/manifest.json
+@@ -0,0 +1,13 @@
++{
++  "base_url": "http://127.0.0.1:8000",
++  "model": "unverified",
++  "top_k": 5,
++  "cache_state": "uncontrolled",
++  "repeat": 1,
++  "concurrency": 1,
++  "started_at_unix": 1792631431.0178237,
++  "dataset_sha256": "24597c1551e29439ea60c0f5d9c56e86563571bc147dc54327c9a5053e21ba24",
++  "note": "Model/top_k/cache state are operator declarations. /health is shallow; initialization failures may occur later.",
++  "status": "blocked",
++  "error_type": "URLError"
++}
+\ No newline at end of file

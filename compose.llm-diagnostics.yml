@@ -1,0 +1,10 @@
+# Merge with your existing docker-compose.yml; does not replace it.
+services:
+  backend:
+    environment:
+      RAG_TRACE_PATH: /app/benchmark_results/trace.jsonl
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-60}
+      LLM_MAX_RETRIES: ${LLM_MAX_RETRIES:-0}
+      LLM_STREAM_ATTEMPTS: ${LLM_STREAM_ATTEMPTS:-1}
+    volumes:
+      - ./benchmark_results:/app/benchmark_results

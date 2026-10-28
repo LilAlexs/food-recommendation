@@ -1,0 +1,47 @@
+{
+  "base_url": "http://localhost:8000",
+  "model": "Qwen/Qwen3.8-Flash-Next",
+  "top_k": 5,
+  "cache_state": "uncontrolled",
+  "repeat": 1,
+  "limit": 5,
+  "concurrency": 1,
+  "timeout_seconds": 240.0,
+  "max_consecutive_failures": 1,
+  "started_at_unix": 1792654516.0308597,
+  "status": "stopped_after_failures",
+  "note": "Model/top_k/cache state are operator declarations. HTTP timeout does not cancel backend work.",
+  "dataset_sha256": "24597c1551e29439ea60c0f5d9c56e86563571bc147dc54327c9a5053e21ba24",
+  "planned_scenarios": 5,
+  "completed_scenarios": 5,
+  "last_scenario_success": false,
+  "updated_at_unix": 1792654726.7927172,
+  "quality_status": "pending labels and review; no retrieval/constraint scores claimed",
+  "latency_scope": "HTTP client wall clock; seed turns excluded; includes cache hits",
+  "summary": {
+    "all": {
+      "requests": 5,
+      "successes": 4,
+      "failure_rate": 0.19999999999999996,
+      "p50_success_ms": 32844.04540003743,
+      "p95_success_ms": 55439.524799992796,
+      "trace_coverage": 1.0,
+      "llm_calls": 15,
+      "llm_errors": 1,
+      "llm_timeouts": 0
+    },
+    "independent": {
+      "requests": 5,
+      "successes": 4,
+      "failure_rate": 0.19999999999999996,
+      "p50_success_ms": 32844.04540003743,
+      "p95_success_ms": 55439.524799992796,
+      "trace_coverage": 1.0,
+      "llm_calls": 15,
+      "llm_errors": 1,
+      "llm_timeouts": 0
+    }
+  },
+  "stop_reason": "Client failure; backend may still be running. Do not immediately retry.",
+  "finished_at_unix": 1792654726.79224
+}

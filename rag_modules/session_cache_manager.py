@@ -1,3 +1,8 @@
+from rag_modules.session_constraints import state_for
+from rag_modules.query_preparation import prepare, enabled
+from rag_modules.generation_errors import usable_answer
+from rag_modules.performance_monitor import event
+from rag_modules.performance_monitor import timed, llm_create, submit_context
 """
 会话缓存管理模块
 负责管理会话级语义缓存和上下文
@@ -27,6 +32,8 @@ class SessionCacheManager:
         # 🚀 会话级语义缓存系统 - 针对每个聊天窗口独立缓存
         self.session_caches = {}  # 按session_id分组的缓存：{session_id: {query: response}}
         self.session_embeddings = {}  # 按session_id分组的向量：{session_id: {query: embedding}}
+        self.constraint_states = {}
+        self.confirmed_recipes = {}  # session -> confirmed identity, or None after a topic barrier
         self.session_contexts = {}  # 按session_id分组的上下文：{session_id: [messages]}
         
         # 缓存配置
@@ -45,11 +52,24 @@ class SessionCacheManager:
         except:
             return 0.0
 
+    @timed("cache.lookup")
     def check_semantic_cache(self, query: str, session_id: str = None) -> Optional[str]:
         """检查会话级语义缓存中是否有相似查询"""
+        if state_for(self, session_id).any():
+            event(kind="cache_policy", reason="scoped_constraints_bypass")
+            return None
         if not session_id or session_id not in self.session_caches:
             return None
 
+        if enabled("RAG_ADAPTIVE_CONTEXT"):
+            plan = prepare(query, self.session_contexts.get(session_id, []))
+            if plan.dependent:
+                event(kind="cache_policy", reason="dependent_bypass")
+                return None
+            # Exact matching avoids silently reusing a previous dish's answer.
+            cached = self.session_caches[session_id].get(query)
+            answer = cached.get("response") if cached else None
+            return answer if usable_answer(answer) else None
         session_cache = self.session_caches[session_id]
         session_embeddings = self.session_embeddings[session_id]
 
@@ -75,7 +95,7 @@ class SessionCacheManager:
                     best_similarity = similarity
                     best_response = cached_data['response']
 
-        if best_response:
+        if usable_answer(best_response):
             logger.info(f"🎯 会话缓存命中! Session: {session_id}, 相似度: {best_similarity:.3f}")
             return best_response
 
@@ -84,9 +104,14 @@ class SessionCacheManager:
     def add_to_semantic_cache(self, query: str, response: str, session_id: str = None):
         """将查询-答案对添加到会话级语义缓存"""
         try:
-            if not session_id:
+            if state_for(self, session_id).any():
+                return
+            if not session_id or not usable_answer(response):
                 return
 
+            if enabled("RAG_ADAPTIVE_CONTEXT") and prepare(
+                    query, self.session_contexts.get(session_id, [])).dependent:
+                return
             # 初始化会话缓存
             if session_id not in self.session_caches:
                 self.session_caches[session_id] = {}
@@ -117,10 +142,14 @@ class SessionCacheManager:
         except Exception as e:
             logger.warning(f"添加到语义缓存失败: {e}")
 
+    def set_confirmed_recipe(self, session_id, recipe=None):
+        if session_id:
+            self.confirmed_recipes[session_id] = dict(recipe) if recipe else None
+
     def add_to_context(self, session_id: str, query: str, response: str):
         """添加对话到上下文历史"""
         try:
-            if not session_id:
+            if not session_id or not usable_answer(response):
                 return
 
             # 初始化会话上下文
@@ -145,9 +174,15 @@ class SessionCacheManager:
         except Exception as e:
             logger.warning(f"添加上下文失败: {e}")
 
+    @timed("query.context")
     def get_context_for_query(self, session_id: str, current_query: str) -> str:
         """获取增强的查询上下文"""
         try:
+            if enabled("RAG_ADAPTIVE_CONTEXT"):
+                plan = prepare(current_query, self.session_contexts.get(session_id, []))
+                event(kind="query_preparation", reason=plan.reason, dependent=plan.dependent,
+                      original_chars=len(current_query), prepared_chars=len(plan.text))
+                return plan.text
             if not session_id or session_id not in self.session_contexts:
                 return current_query
 
@@ -194,6 +229,8 @@ class SessionCacheManager:
             del self.session_caches[session_id]
         if session_id in self.session_embeddings:
             del self.session_embeddings[session_id]
+        self.confirmed_recipes.pop(session_id, None)
+        self.constraint_states.pop(session_id, None)
         if session_id in self.session_contexts:
             del self.session_contexts[session_id]
         logger.info(f"🗑️ 已清除会话 {session_id} 的缓存")
@@ -203,4 +240,6 @@ class SessionCacheManager:
         self.session_caches.clear()
         self.session_embeddings.clear()
         self.session_contexts.clear()
+        self.confirmed_recipes.clear()
+        self.constraint_states.clear()
         logger.info("🗑️ 已清除所有会话缓存")
